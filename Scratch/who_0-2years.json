@@ -1,0 +1,24 @@
+{
+    "WFA": {    
+        "Male": [],
+        "Female": []
+    },
+    "HFA":{
+        "Male":
+        [],
+        "Female":
+        []   
+    },
+    "WFH":{
+        "Male":[],
+        "Female":[]
+    },
+    "BAZ":{
+        "Male":[],
+        "Female":[]
+    },
+    "MUAC":{
+        "Male":[],
+        "Female":[]
+    }
+}

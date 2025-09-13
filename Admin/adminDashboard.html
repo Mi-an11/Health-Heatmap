@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Malnutrition Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: white;
+        }
+
+        .progress-background {
+            height: 0.5rem;
+            width: 100%;
+            border-radius: 9999px;
+            background-color: rgba(34, 38, 45, 0.2);
+        }
+
+        .progress-foreground {
+            height: 100%;
+            border-radius: 9999px;
+            background-color: #0e1e2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #f0f4f8;
+        }
+
+        /* Corrected CSS. The width and height properties must be applied to the #map element directly. */
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <div class="w-64 bg-card border-r border-border flex flex-col h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">LGU Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="adminDashboard.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a href="barangayManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building-2 w-5 h-5 mr-3">
+                    <path d="M6 22V7H4v15c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M10 22V3h-2v19c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M14 22V9h-2v13c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M18 22V11h-2v11c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                </svg>
+                <span class="flex-1 text-left">Barangay Management</span>
+            </a>
+            <a href="analytics.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-bar-chart-3 w-5 h-5 mr-3">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span class="flex-1 text-left">Analytics</span>
+            </a>
+            <a href="userManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-users w-5 h-5 mr-3">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="flex-1 text-left">User Management</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Sibalom LGU</p>
+                    <p class="text-xs text-muted-foreground">Administrator</p>
+                </div>
+            </div>
+            <a href="../Landing Page/landingPage.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+        <div class="p-6 space-y-5">
+                <!-- Header Section -->
+                <div class="flex items-center justify-between rounded-lg">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-foreground">Smart Malnutrition Dashboard</h1>
+                        <p class="text-sm text-muted-foreground">Real-time monitoring across 76 barangays</p>
+                    </div>
+                </div>
+            
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Barangays</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-map-pin h-4 w-4 text-muted-foreground">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold">76</div>
+                        <p class="text-xs text-muted-foreground">Complete coverage area</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Cases</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-users h-4 w-4 text-muted-foreground">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold">0</div>
+                        <p class="text-xs text-muted-foreground">Active malnutrition cases</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Critical Areas</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-alert-triangle h-4 w-4 text-destructive">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                            <path d="M12 9v4" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold text-destructive">0</div>
+                        <p class="text-xs text-muted-foreground">Immediate intervention needed</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">At-Risk Areas</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-trending-up h-4 w-4 text-yellow-600">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                            <polyline points="16 7 22 7 22 13" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold text-yellow-600">0</div>
+                        <p class="text-xs text-muted-foreground">Monitoring required</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Normal Areas</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-zap h-4 w-4 text-green-600">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold text-green-600">0</div>
+                        <p class="text-xs text-muted-foreground">Stable conditions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="rounded-xl border bg-card text-card-foreground shadow lg:col-span-2">
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="whitespace-nowrap tracking-tight text-1xl font-semibold">Smart Heatmap - 76
+                                    Barangays</h3>
+                                <p class="text-sm text-muted-foreground">Real-time severity mapping with interactive
+                                    controls</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <div class="relative">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="lucide lucide-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="m21 21-4.3-4.3" />
+                                    </svg>
+                                    <input type="text" placeholder="Search barangay..."
+                                        class="flex h-9 w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10">
+                                </div>
+                                <div class="relative w-32">
+                                    <button
+                                        class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1">
+                                        <span>All</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"
+                                            class="lucide lucide-chevron-down h-4 w-4 shrink-0 opacity-50">
+                                            <path d="m6 9 6 6 6-6" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0 ">
+                        <div id="map" class=" w-full rounded-lg border"></div>
+                    </div>
+                </div>
+                <!-- Priority Intervention Areas Card -->
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <h3 class="whitespace-nowrap tracking-tight text-xl font-semibold">Top Priority Areas</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Highest risk barangays requiring immediate attention
+                        </p>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Sample static priority barangays -->
+                            <div
+                                class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="text-sm font-medium bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                                        1
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Barangay 10</div>
+                                        <div class="text-sm text-muted-foreground">
+                                            70 cases • 4 workers
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80">
+                                        95%
+                                    </span>
+                                    <!-- TrendingUp icon for 'up' trend -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4 text-red-500">
+                                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                                        <polyline points="16 7 22 7 22 13" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="text-sm font-medium bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                                        2
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Barangay 4</div>
+                                        <div class="text-sm text-muted-foreground">
+                                            60 cases • 3 workers
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80">
+                                        90%
+                                    </span>
+                                    <!-- TrendingUp icon for 'up' trend -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4 text-red-500">
+                                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                                        <polyline points="16 7 22 7 22 13" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="text-sm font-medium bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                                        3
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Barangay 1</div>
+                                        <div class="text-sm text-muted-foreground">
+                                            55 cases • 3 workers
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80">
+                                        85%
+                                    </span>
+                                    <!-- TrendingUp icon for 'up' trend -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="lucide lucide-trending-up w-4 h-4 text-red-500">
+                                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                                        <polyline points="16 7 22 7 22 13" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="text-sm font-medium bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                                        4
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Barangay 7</div>
+                                        <div class="text-sm text-muted-foreground">
+                                            48 cases • 2 workers
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80">
+                                        78%
+                                    </span>
+                                    <!-- Placeholder for 'stable' or 'down' if needed -->
+                                    <div class="w-4 h-4"></div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="text-sm font-medium bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                                        5
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Barangay 9</div>
+                                        <div class="text-sm text-muted-foreground">
+                                            35 cases • 3 workers
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <span
+                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-secondary text-secondary-foreground">
+                                        68%
+                                    </span>
+                                    <!-- TrendingDown icon for 'down' trend -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="lucide lucide-trending-down w-4 h-4 text-green-500">
+                                        <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                                        <polyline points="16 17 22 17 22 11" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-p4NxAoJBhIINf9fCjEvoqKz1qV4+s0Lw+J5w7+L6j+O8=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            var map = L.map('map').setView([10.72, 122.18], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 200);
+
+        });
+    </script>
+
+
+    <script>
+        const BARANGAYS = [
+            "Alangan", "Bari", "Biga-a", "Bongbongan I", "Bongbongan II", "Bongsod", "Bontol", "Bugnay", "Bulalacao",
+            "Cabanbanan", "Cabariuan", "Cabladan", "Cadoldolan", "Calog", "Calo-oy", "Catmon", "Catungan I", "Catungan II",
+            "Catungan III", "Catungan IV", "Cubay-Napultan", "Cubay-Sermon", "District I", "District II", "District III",
+            "District IV", "Egaña", "Esperanza I", "Esperanza II", "Esperanza III", "Igcococ", "Igdagmay", "Igdalaquit",
+            "Iglanot", "Igpanolong", "Igparas", "Igsuming", "Ilabas", "Imparayan", "Inabasan", "Indag-an", "Initan",
+            "Insarayan", "Lacaron", "Lagdo", "Lambayagan", "Luna", "Luyang", "Maasin", "Mabini", "Millamena", "Mojon",
+            "Nagdayao", "Nazareth", "Odiong", "Olaga", "Pangpang", "Panlagangan", "Pantao", "Pasong", "Pis-anan", "Rombang",
+            "Salvacion", "San Juan", "Sido", "Solong", "Tabongtabong", "Tigbalua I", "Tigbalua II", "Tig-ohot",
+            "Tordesillas", "Tulatula", "Valentin Grasparil", "Villafont", "Villahermosa", "Villar"
+        ];
+
+        // This object represents your backend data. Replace with real data.
+        const MALNUTRITION_DATA = {
+            "Cadoldolan": "critical",
+            "Luna": "critical",
+            "Bontol": "critical",
+            "Bulalacao": "critical",
+            "San Juan": "critical",
+            "Iglanot": "at-risk",
+            "Igdagmay": "at-risk",
+            "Igdalaquit": "at-risk",
+            "Imparayan": "at-risk",
+            "Inabasan": "at-risk",
+            "Indag-an": "at-risk",
+            "Initan": "at-risk",
+            "Insarayan": "at-risk",
+            "Rombang": "at-risk",
+            "Salvacion": "at-risk",
+        };
+
+        const SEEDED_COORDS = {
+            "Alangan": {lat: 10.7889, lon: 122.0175},
+            "Bari": {lat: 10.7974, lon: 122.0068},
+            "Biga-a": {lat: 10.8148, lon: 121.9992},
+            "Bongbongan I": {lat: 10.8424, lon: 122.0278},
+            "Bongbongan II": {lat: 10.8228, lon: 122.0306},
+            "Bongsod": {lat: 10.7984, lon: 121.9901},
+            "Bontol": {lat: 10.7572, lon: 122.0925},
+            "Bugnay": {lat: 10.7935, lon: 122.0940},
+            "Bulalacao": {lat: 10.7413, lon: 122.1042},
+            "Cabanbanan": {lat: 10.7987, lon: 122.1279},
+            "Cabariuan": {lat: 10.8296, lon:122.0030},
+            "Cabladan": {lat: 10.8012, lon:122.1659},
+            "Cadoldolan": {lat: 10.8256, lon:122.0135},
+            "Calog": {lat: 10.7434, lon:122.0469},
+            "Calo-oy": {lat: 10.7361, lon:122.0915},
+            "Catmon": {lat: 10.7801, lon:122.0306},
+            "Catungan I": {lat: 10.7672, lon:122.0150},
+            "Catungan II": {lat: 10.7631, lon:122.0042},
+            "Catungan III": {lat: 10.7662, lon:121.9966},
+            "Catungan IV": {lat: 10.7658, lon:121.9848},
+            "Cubay-Napultan": {lat: 10.7879, lon:121.9929},
+            "Cubay-Sermon": {lat: 10.7838, lon:122.0259},
+            "District I": {lat: 10.7925, lon:122.0064},
+            "District II": {lat: 10.7927, lon:122.0169},
+            "District III": {lat: 10.7797, lon:122.0060},
+            "District IV": {lat: 10.7931, lon:122.0252},
+            "Egaña": {lat:10.7476, lon:122.0080},
+            "Esperanza I": {lat:10.8044, lon:122.0085},
+            "Esperanza II": {lat:10.8078, lon:122.0172},
+            "Esperanza III": {lat:10.8100, lon:122.0123},
+            "Igcococ": {lat:10.7293, lon:122.0634},
+            "Igdagmay": {lat:10.8306, lon:122.0235},
+            "Igdalaquit": {lat:10.7865, lon:122.0597},
+            "Iglanot": {lat:10.7878, lon:122.0446},
+            "Igpanolong": {lat:10.7731, lon:122.0933},
+            "Igparas": {lat:10.7094, lon:122.0774},
+            "Igsuming": {lat:10.8018, lon:122.0842},
+            "Ilabas": {lat:10.7889, lon:121.9837},
+            "Imparayan": {lat:10.7889, lon:122.1087},
+            "Inabasan": {lat:10.7321, lon:122.0234},
+            "Indag-an": {lat:10.7710, lon:122.0820},
+            "Initan": {lat:10.7446, lon:122.0624},
+            "Insarayan": {lat:10.7535, lon:122.0241},
+            "Lacaron": {lat:10.8277, lon:121.9916},
+            "Lagdo": {lat:10.8435, lon:122.0132},
+            "Lambayagan": {lat:	10.7285, lon:122.0792},
+            "Luna": {lat:10.7673, lon:122.1069},
+            "Luyang": {lat:10.7380, lon:122.0787},
+            "Maasin": {lat:10.7994, lon:122.0673},
+            "Mabini": {lat:10.7581, lon: 122.0469},
+            "Millamena": {lat:10.7534, lon:122.0681},
+            "Mojon": {lat:10.8301, lon:121.9841},
+            "Nagdayao": {lat:10.7742, lon:122.0460},
+            "Nazareth": {lat:10.7705, lon:122.0293},
+            "Odiong": {lat:	10.7771, lon:121.9838},
+            "Olaga": {lat:10.8153, lon:121.9924},
+            "Pangpang": {lat:10.8100, lon:121.9854},
+            "Panlagangan": {lat:10.7684, lon:122.0580},
+            "Pantao": {lat:10.8025, lon:121.9777},
+            "Pasong": {lat:10.7820, lon:122.0359},
+            "Pis-Anan": {lat:10.7668, lon:122.0705},
+            "Rombang": {lat:10.8174, lon:121.9845},
+            "Salvacion": {lat:10.7832, lon:122.0721},
+            "San Juan": {lat:10.7978, lon:122.0486},
+            "Sido": {lat:10.8102, lon:122.0454},
+            "Solong": {lat:10.8022, lon:122.0270},
+            "Tabongtabong": {lat:110.7093, lon:122.0643},
+            "Tigbalua I": {lat:10.7616, lon:122.0188},
+            "Tigbalua II": {lat:10.7596, lon:122.0276},
+            "Tig-Ohot": {lat:10.7230, lon:122.0449},
+            "Tordesillas": {lat:10.7503, lon:122.1250},
+            "Tulatula": {lat:10.7463, lon:122.0864},
+            "Valentin Grasparil": {lat:10.7169, lon:122.0977},
+            "Villafont": {lat:10.7896, lon:122.0808},
+            "Villahermosa": {lat:10.7925, lon:122.0385},
+            "Villar": {lat:10.8155, lon:122.0071},
+            
+            
+        };
+
+        const map = L.map('map').setView([10.7883, 122.0175], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const heatData = [];
+        const priorityListEl = document.getElementById('priority-list');
+
+        function statusToIntensity(status) {
+            if (status === "critical") return 1.0;
+            if (status === "at-risk") return 0.6;
+            return 0.2;
+        }
+
+        function createPriorityItem(name, status, cases, change) {
+            if (!priorityListEl) {
+                console.error("Priority list element not found!");
+                return;
+            }
+            const statusClass = status === 'critical' ? 'bg-destructive text-destructive-foreground' : 'bg-yellow-600 text-white';
+            const statusText = status === 'critical' ? 'Critical' : 'At-Risk';
+            const rank = priorityListEl.children.length + 1;
+
+            const html = `
+                <div class="flex items-center space-x-4">
+                    <div class="h-10 w-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">${rank}</div>
+                    <div class="flex-1">
+                        <p class="font-medium">Brgy. ${name}</p>
+                        <p class="text-sm text-muted-foreground">${cases} cases, ${change}% increase</p>
+                    </div>
+                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent ${statusClass} hover:${statusClass.split(' ')[0]}/80">${statusText}</span>
+                </div>
+            `;
+            priorityListEl.innerHTML += html;
+        }
+
+        async function geocodeAndPlotAll() {
+            let priorityRank = 1;
+            for (const name of BARANGAYS) {
+                const status = MALNUTRITION_DATA[name] || 'normal';
+
+                let lat, lon;
+                if (SEEDED_COORDS[name]) {
+                    lat = SEEDED_COORDS[name].lat;
+                    lon = SEEDED_COORDS[name].lon;
+                } else {
+                    const q = encodeURIComponent(`${name}, Sibalom, Antique, Philippines`);
+                    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&dedupe=1&q=${q}&addressdetails=1&countrycodes=ph`;
+                    try {
+                        const res = await fetch(url);
+                        const json = await res.json();
+                        if (json && json.length) {
+                            lat = parseFloat(json[0].lat);
+                            lon = parseFloat(json[0].lon);
+                        } else {
+                            continue; // Skip if no coordinates are found
+                        }
+                    } catch (err) {
+                        console.error(`Error geocoding ${name}:`, err);
+                        continue; // Skip on error
+                    }
+                }
+
+                // Add to heatmap data
+                const intensity = statusToIntensity(status);
+                heatData.push([lat, lon, intensity]);
+
+                // Create and bind popup for markers
+                const metrics = fakeMetricsForDemo(status);
+                const marker = L.marker([lat, lon]).addTo(map);
+                marker.bindPopup(`
+                    <b>Brgy. ${name}</b><br/>
+                    Status: <b>${status.toUpperCase()}</b><br/>
+                    Children: ${metrics.children}<br/>
+                    Cases: ${metrics.totalCases}<br/>
+                `);
+
+                // Add to Priority Areas list if critical or at-risk
+                if (status === 'critical' || status === 'at-risk') {
+                    // Note: You will need to replace these with your actual data for cases and percentage change
+                    createPriorityItem(name, status, Math.round(metrics.totalCases * 2), Math.round(metrics.totalCases / 5));
+                }
+            }
+
+            // Create and add the heatmap layer after all data is gathered
+            L.heatLayer(heatData, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 14,
+                gradient: {
+                    0.0: 'green',
+                    0.5: 'yellow',
+                    1.0: 'red'
+                }
+            }).addTo(map);
+        }
+
+        // Demo numbers to show the popup shape; swap with your backend values.
+        function fakeMetricsForDemo(status) {
+            const base = 50;
+            const risk = status === 'critical' ? 0.35 : status === 'at-risk' ? 0.15 : 0.05;
+            return {
+                children: base,
+                totalCases: Math.round(base * risk)
+            };
+        }
+
+        // Call the async function to start the process
+        geocodeAndPlotAll();
+    </script>
+</body>
+
+</html>

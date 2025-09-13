@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Malnutrition Dashboard - User Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-muted/40;
+            /* Apply a light background similar to shadcn */
+        }
+
+        /* Custom styles for progress bar background */
+        .progress-background {
+            @apply h-2 w-full rounded-full bg-primary/20;
+        }
+
+        .progress-foreground {
+            @apply h-full rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-card border-r border-border flex flex-col h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <!-- Shield icon from lucide-react -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">LGU Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <!-- Navigation Items - 'User Management' is now active -->
+            <a href="adminDashboard.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <!-- LayoutDashboard icon from lucide-react -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a href="barangayManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <!-- Building2 icon from lucide-react -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building-2 w-5 h-5 mr-3">
+                    <path d="M6 22V7H4v15c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M10 22V3h-2v19c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M14 22V9h-2v13c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M18 22V11h-2v11c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                </svg>
+                <span class="flex-1 text-left">Barangay Management</span>
+            </a>
+            <a href="analytics.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <!-- BarChart3 icon from lucide-react -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-bar-chart-3 w-5 h-5 mr-3">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span class="flex-1 text-left">Analytics</span>
+            </a>
+            <a href="userManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <!-- Users icon from lucide-react -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-users w-5 h-5 mr-3">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="flex-1 text-left">User Management</span>
+            </a>
+
+
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <!-- MapPin icon from lucide-react -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Sibalom LGU</p>
+                    <p class="text-xs text-muted-foreground">Administrator</p>
+                </div>
+            </div>
+            <button id="logoutBtn"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <!-- LogOut icon from lucide-react -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-y-auto">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-foreground">User Management</h1>
+                    <p class="text-sm text-muted-foreground">Manage health workers and nutrition specialists</p>
+                </div>
+                <!-- Add New Child Button -->
+                <button id="add-account-btn"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-plus w-4 h-4 mr-2">
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                    </svg>
+                    Add New Account
+                </button>
+            </div>
+
+            <!-- Tabs/Search Section -->
+            <div class="space-y-4">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 md:gap-4">
+                    <div
+                        class="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                        <div class="relative w-full md:w-64">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="lucide lucide-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </svg>
+                            <input type="text" id="searchInput" placeholder="Search Worker..."
+                                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!--Table for List of children-->
+                <div class="rounded-xl border bg-card text-card-foreground shadow w-full">
+                    <div class="p-4 md:p-6">
+                        <div id="List" class="relative w-full overflow-auto">
+                            <table class="w-full caption-bottom text-sm">
+                                <thead class="[&amp;_tr]:border-b">
+                                    <tr
+                                        class=" border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 w-[150px]">
+                                            Name</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Role</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Barangay</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Contact</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Date/Time Added</th>
+                                        <!-- Actions header with flexbox for alignment -->
+
+                                        <th
+                                            class="h-12 px-4 text-center align-middle font-medium text-muted-foreground w-[180px]">
+                                            Actions
+                                        </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="worker-table-body" class="[&amp;_tr:last-child]:border-0">
+                                    <!-- Dynamic rows will be added here by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding and updating accounts -->
+    <div id="user-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity opacity-0 pointer-events-none">
+        <div
+            class="bg-card text-card-foreground rounded-lg p-6 shadow-lg transform transition-transform scale-95 duration-300 w-full max-w-lg md:max-w-xl">
+            <div class="flex items-center justify-between pb-4">
+                <h3 id="modal-title" class="text-xl font-semibold"></h3>
+                <button id="close-modal-btn" class="text-muted-foreground hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-x w-6 h-6">
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6L18 18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="user-form" class="space-y-4">
+                <input type="hidden" id="edit-index">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium mb-1">Name</label>
+                        <input type="text" id="name" name="name" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </div>
+                    <div>
+                        <label for="role" class="block text-sm font-medium mb-1">Role</label>
+                        <input type="text" id="role" name="role" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="barangay" class="block text-sm font-medium mb-1">Barangay</label>
+                        <select id="barangay" name="barangay" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                            <option value="">Select a barangay</option>
+                            <option value="Barangay A">Barangay A</option>
+                            <option value="Barangay B">Barangay B</option>
+                            <option value="Barangay C">Barangay C</option>
+                            <option value="Barangay D">Barangay D</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="contactNumber" class="block text-sm font-medium mb-1">Contact Number</label>
+                        <input type="text" id="contactNumber" name="contactNumber" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium mb-1">Email Account</label>
+                        <input type="email" id="email" name="email" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+                        <input type="password" id="password" name="password" required
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" id="exit-btn"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                        Exit
+                    </button>
+                    <button type="button" id="update-btn"
+                        class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                        Update
+                    </button>
+                    <button type="submit" id="add-btn"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                        Add
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addAccountBtn = document.getElementById('add-account-btn');
+            const userModal = document.getElementById('user-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const exitBtn = document.getElementById('exit-btn');
+            const userForm = document.getElementById('user-form');
+            const addBtn = document.getElementById('add-btn');
+            const updateBtn = document.getElementById('update-btn');
+            const workerTableBody = document.getElementById('worker-table-body');
+            const searchInput = document.getElementById('searchInput');
+
+            // In-memory data store for demonstration
+            let workers = [];
+
+            const showModal = (mode, workerData = {}) => {
+                if (mode === 'add') {
+                    modalTitle.textContent = "Create New Account";
+                    addBtn.classList.remove('hidden');
+                    updateBtn.classList.add('hidden');
+                    userForm.reset();
+                } else if (mode === 'edit') {
+                    modalTitle.textContent = "Update Account";
+                    addBtn.classList.add('hidden');
+                    updateBtn.classList.remove('hidden');
+                    document.getElementById('edit-index').value = workers.indexOf(workerData);
+                    document.getElementById('name').value = workerData.name;
+                    document.getElementById('role').value = workerData.role;
+                    document.getElementById('barangay').value = workerData.barangay;
+                    document.getElementById('contactNumber').value = workerData.contactNumber;
+                    document.getElementById('email').value = workerData.email;
+                }
+                userModal.classList.remove('opacity-0', 'pointer-events-none');
+                userModal.querySelector('div').classList.remove('scale-95');
+                userModal.querySelector('div').classList.add('scale-100');
+            };
+
+            const hideModal = () => {
+                userModal.querySelector('div').classList.remove('scale-100');
+                userModal.querySelector('div').classList.add('scale-95');
+                userModal.classList.add('opacity-0', 'pointer-events-none');
+                userForm.reset();
+            };
+
+            const renderTable = () => {
+                workerTableBody.innerHTML = '';
+                if (workers.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `<td colspan="6" class="p-4 text-center text-muted-foreground">No workers found. Add a new account to get started.</td>`;
+                    workerTableBody.appendChild(emptyRow);
+                } else {
+                    workers.forEach((worker, index) => {
+                        const row = document.createElement('tr');
+                        row.className = 'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted';
+                        const date = new Date(worker.createdDate);
+                        const formattedDate = date.toLocaleDateString();
+                        const formattedTime = date.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        const formattedDateTime = `${formattedDate}, ${formattedTime}`;
+
+                        row.innerHTML = `
+                            <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 font-medium">${worker.name}</td>
+                            <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-muted-foreground">${worker.role}</td>
+                            <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${worker.barangay}</td>
+                            <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                                <span class="block">${worker.contactNumber}</span>
+                                <span class="block text-xs text-muted-foreground">${worker.email}</span>
+                            </td>
+                            <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${formattedDateTime}</td>
+                            <td class="p-4 align-middle">
+                                <div class="flex justify-center gap-2">
+                                    <button class="view-btn inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3" data-index="${index}">View</button>
+                                    <button class="delete-btn inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 h-9 px-3" data-index="${index}">Delete</button>
+                                </div>
+                            </td>
+
+                        `;
+                        workerTableBody.appendChild(row);
+                    });
+                }
+            };
+
+            // Event listeners for modal control
+            addAccountBtn.addEventListener('click', () => showModal('add'));
+            closeModalBtn.addEventListener('click', hideModal);
+            exitBtn.addEventListener('click', hideModal);
+
+            // Form submission listeners
+            userForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newWorker = {
+                    name: document.getElementById('name').value,
+                    role: document.getElementById('role').value,
+                    barangay: document.getElementById('barangay').value,
+                    contactNumber: document.getElementById('contactNumber').value,
+                    email: document.getElementById('email').value,
+                    createdDate: Date.now(),
+                };
+
+                workers.push(newWorker);
+                renderTable();
+                hideModal();
+            });
+
+            updateBtn.addEventListener('click', () => {
+                const indexToUpdate = document.getElementById('edit-index').value;
+                workers[indexToUpdate] = {
+                    ...workers[indexToUpdate],
+                    name: document.getElementById('name').value,
+                    role: document.getElementById('role').value,
+                    barangay: document.getElementById('barangay').value,
+                    contactNumber: document.getElementById('contactNumber').value,
+                    email: document.getElementById('email').value,
+                };
+                renderTable();
+                hideModal();
+            });
+
+            // Event listener for table actions (View and Delete)
+            workerTableBody.addEventListener('click', (e) => {
+                const viewBtn = e.target.closest('.view-btn');
+                const deleteBtn = e.target.closest('.delete-btn');
+
+                if (viewBtn) {
+                    const index = viewBtn.dataset.index;
+                    const worker = workers[index];
+                    showModal('edit', worker);
+                }
+
+                if (deleteBtn) {
+                    const index = deleteBtn.dataset.index;
+                    workers.splice(index, 1);
+                    renderTable();
+                }
+            });
+
+            // Filter the table based on search input
+            searchInput.addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = childrenTableBody.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const nameCell = row.cells[0];
+                    if (nameCell) {
+                        const name = nameCell.textContent.toLowerCase();
+                        if (name.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            });
+
+            // Initial render of the table
+            renderTable();
+        });
+    </script>
+</body>
+
+</html>

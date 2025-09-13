@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Malnutrition Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: white;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="hidden md:flex flex-col w-64 bg-card border-r border-border h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">Child Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Health Worker Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="workerDashboard.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a href="childMonitoring.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-baby-icon lucide-baby w-5 h-5 mr-3">
+                    <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5" />
+                    <path d="M15 12h.01" />
+                    <path
+                        d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1" />
+                    <path d="M9 12h.01" />
+                </svg>
+                <span class="flex-1 text-left">Child Monitoring Module</span>
+            </a>
+            <a href="heatmap.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <!-- Users icon from lucide-react -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-map-minus-icon lucide-map-minus w-5 h-5 mr-3">
+                    <path
+                        d="m11 19-1.106-.552a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0l4.212 2.106a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619V14" />
+                    <path d="M15 5.764V14" />
+                    <path d="M21 18h-6" />
+                    <path d="M9 3.236v15" />
+                </svg>
+                <span class="flex-1 text-left">Heatmap</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Mi-an Dulalia</p>
+                    <p class="text-xs text-muted-foreground">Health Worker</p>
+                </div>
+            </div>
+            <a href="../Landing Page/landingPage.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucude-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </a>
+
+
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-y-auto ">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-foreground">Child Monitoring</h1>
+                    <p class="text-sm text-muted-foreground">Comprehensive child health record management and tracking
+                        system</p>
+                </div>
+                <!-- Add New Child Button -->
+                <button id="add-child-btn"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-plus w-4 h-4 mr-2">
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                    </svg>
+                    Add New Child
+                </button>
+            </div>
+
+            <!-- Tabs/Search Section -->
+            <div class="space-y-4">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 md:gap-4">
+                    <div
+                        class="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                        <div class="relative w-full md:w-64">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="lucide lucide-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.3-4.3" />
+                            </svg>
+                            <input type="text" id="searchInput" placeholder="Search children..."
+                                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10">
+                        </div>
+                        <div class="relative w-full md:w-40">
+                            <button
+                                class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1">
+                                <span>All Status</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-chevron-down h-4 w-4 shrink-0 opacity-50">
+                                    <path d="m6 9 6 6 6-6" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Table for List of children-->
+                <div class="rounded-xl border bg-card text-card-foreground shadow w-full">
+                    <div class="p-4 md:p-6">
+                        <div id="List" class="relative w-full overflow-auto">
+                            <table class="w-full caption-bottom text-sm">
+                                <thead class="[&amp;_tr]:border-b">
+                                    <tr
+                                        class=" border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 w-[150px]">
+                                            Name</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Age</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Gender</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Nutritional Status</th>
+                                        <th
+                                            class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
+                                            Date/Time Added</th>
+                                        <th
+                                            class="h-12 px-4 text-center align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 w-[150px]">
+                                            Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="children-table-body" class="[&amp;_tr:last-child]:border-0">
+                                    <!-- Dynamic rows will be added here by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Child Detail View -->
+        <div id="child-view" class="hidden p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
+            <button id="back-btn"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chevron-left w-4 h-4 mr-2">
+                    <path d="m15 18-6-6 6-6" />
+                </svg>
+                Back to Dashboard
+            </button>
+            <div class="rounded-xl border bg-card text-card-foreground shadow w-full p-4 md:p-6 space-y-6">
+                <div class="flex items-center space-x-4">
+                    <div
+                        class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-xl font-bold text-primary-foreground">
+                        <span id="child-initials"></span>
+                    </div>
+                    <div class="space-y-1">
+                        <h2 id="child-name-display" class="text-2xl font-semibold text-foreground"></h2>
+                        <p id="child-age-display" class="text-sm text-muted-foreground"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Gender</h4>
+                        <p id="child-gender-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Overall Nutritional Status</h4>
+                        <p id="child-status-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Date of Birth</h4>
+                        <p id="child-dob-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Barangay</h4>
+                        <p id="child-barangay-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Weight (kg)</h4>
+                        <p id="child-weight-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Height (cm)</h4>
+                        <p id="child-height-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">MUAC (cm)</h4>
+                        <p id="child-mauc-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">BMI</h4>
+                        <p id="child-bmi-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Date Added On</h4>
+                        <p id="child-datetime-display" class="font-semibold text-foreground"></p>
+                    </div>
+
+                    <!-- New fields for individual statuses in Child Detail View -->
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Weight-for-Age (WFA)</h4>
+                        <p id="child-wfa-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Height-for-Age (HFA)</h4>
+                        <p id="child-hfa-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Weight-for-Height (WFH)</h4>
+                        <p id="child-wfh-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">BMI-for-Age (BAZ)</h4>
+                        <p id="child-baz-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">MUAC Status</h4>
+                        <p id="child-muac-status-display" class="font-semibold text-foreground"></p>
+                    </div>
+                </div>
+
+                <!-- Growth Chart Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-semibold text-foreground">Growth Charts</h3>
+                        <select id="chart-time-range"
+                            class="flex h-9 w-40 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm">
+                            <option value="all">All Time</option>
+                            <option value="6months">Last 6 Months</option>
+                            <option value="12months">Last 12 Months</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="weightChart"></canvas>
+                        </div>
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="heightChart"></canvas>
+                        </div>
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="maucChart"></canvas>
+                        </div>
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="bmiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add Child Modal -->
+    <div id="add-child-modal" class="modal-overlay">
+        <div class="relative w-full max-w-2xl mx-auto rounded-lg shadow-lg bg-white overflow-hidden m-4">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-xl font-semibold">Add New Child</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-x w-6 h-6">
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6L18 18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[80vh]">
+                <form id="add-child-form" class="space-y-6">
+                    <!-- Personal Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" id="name"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                required>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                            <input type="date" id="dob"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                required>
+                        </div>
+                        <!-- Age Calculation Display -->
+                        <div class="flex flex-col space-y-2 col-span-1 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Calculated Age</label>
+                            <div id="calculated-age"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Please select a date of birth...
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                            <select id="gender"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2 col-span-1">
+                            <label for="barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                            <select id="barangay"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                <option value="" disabled selected>Select a Barangay</option>
+                                <option value="Biking">Biking</option>
+                                <option value="Bingag">Bingag</option>
+                                <option value="Bitaog">Bitaog</option>
+                                <option value="Booy">Booy</option>
+                                <option value="Can-Ubay">Can-Ubay</option>
+                                <option value="Catagbacan">Catagbacan</option>
+                                <option value="Poblacion">Poblacion</option>
+                                <option value="Tuna">Tuna</option>
+                                <option value="Totolan">Totolan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Anthropometric Measurements -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-foreground">Anthropometric Measurements</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-2">
+                                <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                                <input type="number" step="0.1" id="weight"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="height" class="block text-sm font-medium text-gray-700">Height (cm)</label>
+                                <input type="number" step="0.1" id="height"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="mauc" class="block text-sm font-medium text-gray-700">MUAC (cm)</label>
+                                <input type="number" step="0.1" id="mauc"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nutritional Status and BMI -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col space-y-2">
+                            <label for="nutritional-status" class="block text-sm font-medium text-gray-700">Overall Nutritional
+                                Status</label>
+                            <div id="nutritional-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label for="bmi-value" class="block text-sm font-medium text-gray-700">BMI</label>
+                            <div id="bmi-value"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <!-- New fields for individual statuses in Add Child Modal -->
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Weight-for-Age (WFA)</label>
+                            <div id="wfa-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Height-for-Age (HFA)</label>
+                            <div id="hfa-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Weight-for-Height (WFH)</label>
+                            <div id="wfh-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">BMI-for-Age (BAZ)</label>
+                            <div id="baz-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">MUAC Status</label>
+                            <div id="muac-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end p-4 border-t gap-2">
+                <button id="cancel-modal-btn"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground">Cancel</button>
+                <button id="save-child-btn" type="submit" form="add-child-form"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Save
+                    Child</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Child Modal -->
+    <div id="update-child-modal" class="modal-overlay">
+        <div class="relative w-full max-w-2xl mx-auto rounded-lg shadow-lg bg-white overflow-hidden m-4">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-xl font-semibold">Add New Measurement</h3>
+                <button id="close-update-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-x w-6 h-6">
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6L18 18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[80vh]">
+                <form id="update-child-form" class="space-y-6">
+                    <input type="hidden" id="child-id-to-update">
+                    <p id="update-child-name" class="text-lg font-medium"></p>
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-foreground">New Anthropometric Measurements</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-2">
+                                <label for="update-weight" class="block text-sm font-medium text-gray-700">Weight
+                                    (kg)</label>
+                                <input type="number" step="0.1" id="update-weight"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="update-height" class="block text-sm font-medium text-gray-700">Height
+                                    (cm)</label>
+                                <input type="number" step="0.1" id="update-height"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="update-mauc" class="block text-sm font-medium text-gray-700">MUAC
+                                    (cm)</label>
+                                <input type="number" step="0.1" id="update-mauc"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col space-y-2">
+                            <label for="update-nutritional-status"
+                                class="block text-sm font-medium text-gray-700">Overall Nutritional Status</label>
+                            <div id="update-nutritional-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label for="update-bmi-value" class="block text-sm font-medium text-gray-700">BMI </label>
+                            <div id="update-bmi-value"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <!-- New fields for individual statuses in Update Child Modal -->
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Weight-for-Age (WFA)</label>
+                            <div id="update-wfa-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Height-for-Age (HFA)</label>
+                            <div id="update-hfa-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Weight-for-Height (WFH)</label>
+                            <div id="update-wfh-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">BMI-for-Age (BAZ)</label>
+                            <div id="update-baz-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">MUAC Status</label>
+                            <div id="update-muac-status"
+                                class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end p-4 border-t gap-2">
+                <button id="cancel-update-modal-btn"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground">Cancel</button>
+                <button id="save-update-btn" type="submit" form="update-child-form"
+                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Save
+                    Update</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const addChildBtn = document.getElementById('add-child-btn');
+        const modal = document.getElementById('add-child-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelModalBtn = document.getElementById('cancel-modal-btn');
+        const saveChildBtn = document.getElementById('save-child-btn');
+        const weightInput = document.getElementById('weight');
+        const heightInput = document.getElementById('height');
+        const maucInput = document.getElementById('mauc');
+        const nutritionalStatusEl = document.getElementById('nutritional-status');
+        const bmiValueEl = document.getElementById('bmi-value');
+        const addChildForm = document.getElementById('add-child-form');
+        const childrenTableBody = document.getElementById('children-table-body');
+        const searchInput = document.getElementById('searchInput');
+
+        // Main views
+        const dashboardView = document.getElementById('dashboard-view');
+        const childView = document.getElementById('child-view');
+        const backBtn = document.getElementById('back-btn');
+
+        // Child detail view elements
+        const childNameDisplay = document.getElementById('child-name-display');
+        const childAgeDisplay = document.getElementById('child-age-display');
+        const childGenderDisplay = document.getElementById('child-gender-display');
+        const childStatusDisplay = document.getElementById('child-status-display');
+        const childDobDisplay = document.getElementById('child-dob-display');
+        const childBarangayDisplay = document.getElementById('child-barangay-display');
+        const childWeightDisplay = document.getElementById('child-weight-display');
+        const childHeightDisplay = document.getElementById('child-height-display');
+        const childMaucDisplay = document.getElementById('child-mauc-display');
+        const childBmiDisplay = document.getElementById('child-bmi-display');
+        const childDatetimeDisplay = document.getElementById('child-datetime-display');
+        const childInitials = document.getElementById('child-initials');
+
+        // New child detail view elements for individual statuses
+        const childWfaDisplay = document.getElementById('child-wfa-display');
+        const childHfaDisplay = document.getElementById('child-hfa-display');
+        const childWfhDisplay = document.getElementById('child-wfh-display');
+        const childBazDisplay = document.getElementById('child-baz-display');
+        const childMuacStatusDisplay = document.getElementById('child-muac-status-display');
+
+
+        // Update modal elements
+        const updateModal = document.getElementById('update-child-modal');
+        const closeUpdateModalBtn = document.getElementById('close-update-modal-btn');
+        const cancelUpdateModalBtn = document.getElementById('cancel-update-modal-btn');
+        const updateChildNameEl = document.getElementById('update-child-name');
+        const updateWeightInput = document.getElementById('update-weight');
+        const updateHeightInput = document.getElementById('update-height');
+        const updateMaucInput = document.getElementById('update-mauc');
+        const updateNutritionalStatusEl = document.getElementById('update-nutritional-status');
+        const updateBmiValueEl = document.getElementById('update-bmi-value');
+        const saveUpdateBtn = document.getElementById('save-update-btn');
+        const childIdToUpdate = document.getElementById('child-id-to-update');
+        const chartTimeRangeSelect = document.getElementById('chart-time-range');
+
+        // New update modal elements for individual statuses
+        const updateWfaStatusEl = document.getElementById('update-wfa-status');
+        const updateHfaStatusEl = document.getElementById('update-hfa-status');
+        const updateWfhStatusEl = document.getElementById('update-wfh-status');
+        const updateBazStatusEl = document.getElementById('update-baz-status');
+        const updateMuacStatusEl = document.getElementById('update-muac-status');
+
+
+        // New add modal elements for individual statuses
+        const wfaStatusEl = document.getElementById('wfa-status');
+        const hfaStatusEl = document.getElementById('hfa-status');
+        const wfhStatusEl = document.getElementById('wfh-status');
+        const bazStatusEl = document.getElementById('baz-status');
+        const muacStatusEl = document.getElementById('muac-status');
+
+
+        // New elements for age calculation
+        const dobInput = document.getElementById('dob');
+        const calculatedAgeEl = document.getElementById('calculated-age');
+
+        // Store child data (mock database)
+        const childrenData = [];
+
+        // Global variables for Chart instances
+        let weightChart, heightChart, maucChart, bmiChart;
+        let currentChildData = null;
+
+        // Show modal
+        addChildBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        // Hide modal
+        const hideModal = (modalEl) => {
+            modalEl.style.display = 'none';
+        };
+        closeModalBtn.addEventListener('click', () => hideModal(modal));
+        cancelModalBtn.addEventListener('click', () => hideModal(modal));
+        closeUpdateModalBtn.addEventListener('click', () => hideModal(updateModal));
+        cancelUpdateModalBtn.addEventListener('click', () => hideModal(updateModal));
+
+        // Hide modal if user clicks outside of it
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal(modal);
+            }
+        });
+
+        updateModal.addEventListener('click', (e) => {
+            if (e.target === updateModal) {
+                hideModal(updateModal);
+            }
+        });
+
+        // Function to calculate age from DOB
+        const calculateAge = (dob) => {
+            const birthDate = new Date(dob);
+            if (isNaN(birthDate.getTime())) {
+                return null;
+            }
+            const today = new Date();
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            let days = today.getDate() - birthDate.getDate();
+
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+            const totalWeeks = Math.floor(totalDays / 7);
+            const totalMonths = years * 12 + months;
+
+            return {
+                years: years,
+                months: totalMonths,
+                weeks: totalWeeks,
+                days: totalDays,
+            };
+        };
+
+        // Event listener for date of birth input to automatically display age breakdown
+        const updateAgeDisplay = () => {
+            const dob = dobInput.value;
+            const age = calculateAge(dob);
+
+            if (age) {
+                let ageString = '';
+                if (age.years > 0) {
+                    ageString = `${age.years} year${age.years > 1 ? 's' : ''}`;
+                } else if (age.months > 0) {
+                    ageString = `${age.months} month${age.months > 1 ? 's' : ''}`;
+                } else if (age.weeks > 0) {
+                    ageString = `${age.weeks} week${age.weeks > 1 ? 's' : ''}`;
+                } else {
+                    ageString = `${age.days} day${age.days > 1 ? 's' : ''}`;
+                }
+                calculatedAgeEl.textContent = ageString;
+            } else {
+                calculatedAgeEl.textContent = 'Please select a date of birth...';
+            }
+        };
+
+        dobInput.addEventListener('change', updateAgeDisplay);
+
+
+        // --- WHO LMS DATA (SIMPLIFIED SUBSET FOR 0-24 MONTHS) ---
+        // This data is a small subset for demonstration. For full accuracy, use complete WHO datasets.
+        // Source: WHO Child Growth Standards (LMS parameters)
+        const whoLMSData = {
+            'Male': {
+                'WFA': [ // Weight-for-Age (kg)
+                    { age: 0, L: 0.3487, M: 3.3464, S: 0.14602 }, { age: 1, L: 0.2297, M: 4.4709, S: 0.13395 },
+                    { age: 2, L: 0.197, M: 5.5675, S: 0.12385 }, { age: 3, L: 0.1738, M: 6.3762, S: 0.11727 },
+                    { age: 4, L: 0.1553, M: 7.0023, S: 0.11316 }, { age: 5, L: 0.1395, M: 7.5105, S: 0.1108 },
+                    { age: 6, L: 0.1257, M: 7.934, S: 0.10958 }, { age: 7, L: 0.1134, M: 8.297, S: 0.10902 },
+                    { age: 8, L: 0.1021, M: 8.6151, S: 0.10882 }, { age: 9, L: 0.0917, M: 8.9014, S: 0.10881 },
+                    { age: 10, L: 0.082, M: 9.1649, S: 0.10891 }, { age: 11, L: 0.073, M: 9.4122, S: 0.10906 },
+                    { age: 12, L: 0.0644, M: 9.6479, S: 0.10925 }, { age: 13, L: 0.0563, M: 9.8749, S: 0.1095 },
+                    { age: 14, L: 0.0486, M: 10.095, S: 0.10982 }, { age: 15, L: 0.0412, M: 10.309, S: 0.11021 },
+                    { age: 16, L: 0.0341, M: 10.519, S: 0.11067 }, { age: 17, L: 0.0273, M: 10.725, S: 0.1112 },
+                    { age: 18, L: 0.0207, M: 10.928, S: 0.11181 }, { age: 19, L: 0.0143, M: 11.128, S: 0.11249 },
+                    { age: 20, L: 0.008, M: 11.326, S: 0.11325 }, { age: 21, L: 0.0018, M: 11.521, S: 0.1141 },
+                    { age: 22, L: -0.0043, M: 11.715, S: 0.11503 }, { age: 23, L: -0.0103, M: 11.907, S: 0.11605 },
+                    { age: 24, L: -0.0162, M: 12.098, S: 0.11716 }
+                ],
+                'HFA': [ // Height-for-Age (cm)
+                    { age: 0, L: 0.0000, M: 49.97, S: 0.0370 }, { age: 1, L: -0.0001, M: 54.70, S: 0.0350 },
+                    { age: 2, L: -0.0001, M: 58.40, S: 0.0330 }, { age: 3, L: -0.0001, M: 61.40, S: 0.0310 },
+                    { age: 4, L: -0.0001, M: 63.90, S: 0.0300 }, { age: 5, L: -0.0001, M: 66.00, S: 0.0290 },
+                    { age: 6, L: -0.0001, M: 67.80, S: 0.0280 }, { age: 7, L: -0.0001, M: 69.40, S: 0.0270 },
+                    { age: 8, L: -0.0001, M: 70.90, S: 0.0270 }, { age: 9, L: -0.0001, M: 72.30, S: 0.0260 },
+                    { age: 10, L: -0.0001, M: 73.60, S: 0.0260 }, { age: 11, L: -0.0001, M: 74.90, S: 0.0260 },
+                    { age: 12, L: -0.0001, M: 76.10, S: 0.0260 }, { age: 13, L: -0.0001, M: 77.20, S: 0.0260 },
+                    { age: 14, L: -0.0001, M: 78.30, S: 0.0260 }, { age: 15, L: -0.0001, M: 79.40, S: 0.0260 },
+                    { age: 16, L: -0.0001, M: 80.40, S: 0.0260 }, { age: 17, L: -0.0001, M: 81.40, S: 0.0260 },
+                    { age: 18, L: -0.0001, M: 82.30, S: 0.0260 }, { age: 19, L: -0.0001, M: 83.20, S: 0.0260 },
+                    { age: 20, L: -0.0001, M: 84.10, S: 0.0260 }, { age: 21, L: -0.0001, M: 84.90, S: 0.0260 },
+                    { age: 22, L: -0.0001, M: 85.70, S: 0.0260 }, { age: 23, L: -0.0001, M: 86.50, S: 0.0260 },
+                    { age: 24, L: -0.0001, M: 87.20, S: 0.0260 }
+                ],
+                'BAZ': [ // BMI-for-Age (BMI value)
+                    { age: 0, L: 0.0000, M: 13.30, S: 0.0800 }, { age: 1, L: 0.0000, M: 15.00, S: 0.0700 },
+                    { age: 2, L: 0.0000, M: 16.00, S: 0.0600 }, { age: 3, L: 0.0000, M: 16.50, S: 0.0550 },
+                    { age: 4, L: 0.0000, M: 16.70, S: 0.0500 }, { age: 5, L: 0.0000, M: 16.80, S: 0.0480 },
+                    { age: 6, L: 0.0000, M: 16.80, S: 0.0460 }, { age: 7, L: 0.0000, M: 16.70, S: 0.0450 },
+                    { age: 8, L: 0.0000, M: 16.60, S: 0.0440 }, { age: 9, L: 0.0000, M: 16.50, S: 0.0430 },
+                    { age: 10, L: 0.0000, M: 16.40, S: 0.0420 }, { age: 11, L: 0.0000, M: 16.30, S: 0.0410 },
+                    { age: 12, L: 0.0000, M: 16.20, S: 0.0400 }, { age: 13, L: 0.0000, M: 16.10, S: 0.0400 },
+                    { age: 14, L: 0.0000, M: 16.00, S: 0.0390 }, { age: 15, L: 0.0000, M: 15.90, S: 0.0390 },
+                    { age: 16, L: 0.0000, M: 15.80, S: 0.0380 }, { age: 17, L: 0.0000, M: 15.70, S: 0.0380 },
+                    { age: 18, L: 0.0000, M: 15.60, S: 0.0370 }, { age: 19, L: 0.0000, M: 15.50, S: 0.0370 },
+                    { age: 20, L: 0.0000, M: 15.40, S: 0.0360 }, { age: 21, L: 0.0000, M: 15.30, S: 0.0360 },
+                    { age: 22, L: 0.0000, M: 15.20, S: 0.0350 }, { age: 23, L: 0.0000, M: 15.10, S: 0.0350 },
+                    { age: 24, L: 0.0000, M: 15.00, S: 0.0340 }
+                ]
+            },
+            'Female': {
+                'WFA': [ // Weight-for-Age (kg)
+                    { age: 0, L: 0.3000, M: 3.2000, S: 0.1500 }, { age: 1, L: 0.2000, M: 4.2000, S: 0.1400 },
+                    { age: 2, L: 0.1800, M: 5.1000, S: 0.1300 }, { age: 3, L: 0.1600, M: 5.8000, S: 0.1200 },
+                    { age: 4, L: 0.1400, M: 6.4000, S: 0.1150 }, { age: 5, L: 0.1250, M: 6.9000, S: 0.1120 },
+                    { age: 6, L: 0.1100, M: 7.3000, S: 0.1100 }, { age: 7, L: 0.1000, M: 7.6000, S: 0.1090 },
+                    { age: 8, L: 0.0900, M: 7.9000, S: 0.1080 }, { age: 9, L: 0.0800, M: 8.1000, S: 0.1070 },
+                    { age: 10, L: 0.0700, M: 8.4000, S: 0.1060 }, { age: 11, L: 0.0600, M: 8.6000, S: 0.1050 },
+                    { age: 12, L: 0.0500, M: 8.8000, S: 0.1040 }, { age: 13, L: 0.0400, M: 9.0000, S: 0.1030 },
+                    { age: 14, L: 0.0300, M: 9.2000, S: 0.1020 }, { age: 15, L: 0.0200, M: 9.4000, S: 0.1010 },
+                    { age: 16, L: 0.0100, M: 9.6000, S: 0.1000 }, { age: 17, L: 0.0000, M: 9.8000, S: 0.0990 },
+                    { age: 18, L: -0.0100, M: 10.0000, S: 0.0980 }, { age: 19, L: -0.0200, M: 10.2000, S: 0.0970 },
+                    { age: 20, L: -0.0300, M: 10.4000, S: 0.0960 }, { age: 21, L: -0.0400, M: 10.6000, S: 0.0950 },
+                    { age: 22, L: -0.0500, M: 10.8000, S: 0.0940 }, { age: 23, L: -0.0600, M: 11.0000, S: 0.0930 },
+                    { age: 24, L: -0.0700, M: 11.2000, S: 0.0920 }
+                ],
+                'HFA': [ // Height-for-Age (cm)
+                    { age: 0, L: 0.0000, M: 49.00, S: 0.0380 }, { age: 1, L: -0.0001, M: 53.70, S: 0.0360 },
+                    { age: 2, L: -0.0001, M: 57.30, S: 0.0340 }, { age: 3, L: -0.0001, M: 60.20, S: 0.0320 },
+                    { age: 4, L: -0.0001, M: 62.60, S: 0.0310 }, { age: 5, L: -0.0001, M: 64.70, S: 0.0300 },
+                    { age: 6, L: -0.0001, M: 66.50, S: 0.0290 }, { age: 7, L: -0.0001, M: 68.00, S: 0.0280 },
+                    { age: 8, L: -0.0001, M: 69.40, S: 0.0280 }, { age: 9, L: -0.0001, M: 70.70, S: 0.0270 },
+                    { age: 10, L: -0.0001, M: 72.00, S: 0.0270 }, { age: 11, L: -0.0001, M: 73.20, S: 0.0270 },
+                    { age: 12, L: -0.0001, M: 74.40, S: 0.0270 }, { age: 13, L: -0.0001, M: 75.50, S: 0.0270 },
+                    { age: 14, L: -0.0001, M: 76.60, S: 0.0270 }, { age: 15, L: -0.0001, M: 77.60, S: 0.0270 },
+                    { age: 16, L: -0.0001, M: 78.60, S: 0.0270 }, { age: 17, L: -0.0001, M: 79.60, S: 0.0270 },
+                    { age: 18, L: -0.0001, M: 80.50, S: 0.0270 }, { age: 19, L: -0.0001, M: 81.40, S: 0.0270 },
+                    { age: 20, L: -0.0001, M: 82.20, S: 0.0270 }, { age: 21, L: -0.0001, M: 83.00, S: 0.0270 },
+                    { age: 22, L: -0.0001, M: 83.80, S: 0.0270 }, { age: 23, L: -0.0001, M: 84.60, S: 0.0270 },
+                    { age: 24, L: -0.0001, M: 85.30, S: 0.0270 }
+                ],
+                'BAZ': [ // BMI-for-Age (BMI value)
+                    { age: 0, L: 0.0000, M: 13.00, S: 0.0850 }, { age: 1, L: 0.0000, M: 14.50, S: 0.0750 },
+                    { age: 2, L: 0.0000, M: 15.50, S: 0.0650 }, { age: 3, L: 0.0000, M: 16.00, S: 0.0600 },
+                    { age: 4, L: 0.0000, M: 16.20, S: 0.0550 }, { age: 5, L: 0.0000, M: 16.30, S: 0.0520 },
+                    { age: 6, L: 0.0000, M: 16.30, S: 0.0500 }, { age: 7, L: 0.0000, M: 16.20, S: 0.0480 },
+                    { age: 8, L: 0.0000, M: 16.10, S: 0.0470 }, { age: 9, L: 0.0000, M: 16.00, S: 0.0460 },
+                    { age: 10, L: 0.0000, M: 15.90, S: 0.0450 }, { age: 11, L: 0.0000, M: 15.80, S: 0.0440 },
+                    { age: 12, L: 0.0000, M: 15.70, S: 0.0430 }, { age: 13, L: 0.0000, M: 15.60, S: 0.0420 },
+                    { age: 14, L: 0.0000, M: 15.50, S: 0.0420 }, { age: 15, L: 0.0000, M: 15.40, S: 0.0410 },
+                    { age: 16, L: 0.0000, M: 15.30, S: 0.0400 }, { age: 17, L: 0.0000, M: 15.20, S: 0.0400 },
+                    { age: 18, L: 0.0000, M: 15.10, S: 0.0390 }, { age: 19, L: 0.0000, M: 15.00, S: 0.0390 },
+                    { age: 20, L: 0.0000, M: 14.90, S: 0.0380 }, { age: 21, L: 0.0000, M: 14.80, S: 0.0380 },
+                    { age: 22, L: 0.0000, M: 14.70, S: 0.0370 }, { age: 23, L: 0.0000, M: 14.60, S: 0.0370 },
+                    { age: 24, L: 0.0000, M: 14.50, S: 0.0360 }
+                ]
+            }
+        };
+
+        // Helper for linear interpolation
+        function interpolate(x, x0, y0, x1, y1) {
+            if (x1 === x0) return y0;
+            return y0 + ((x - x0) * (y1 - y0)) / (x1 - x0);
+        }
+
+        // Get interpolated LMS parameters for a given age, gender, and indicator
+        function getLMSData(indicator, ageInMonths, gender) {
+            const data = whoLMSData[gender]?.[indicator];
+            if (!data || data.length === 0) return null;
+
+            // Ensure age is within bounds of available data
+            if (ageInMonths < data[0].age) return data[0];
+            if (ageInMonths > data[data.length - 1].age) return data[data.length - 1];
+
+            for (let i = 0; i < data.length - 1; i++) {
+                const curr = data[i];
+                const next = data[i + 1];
+                if (ageInMonths >= curr.age && ageInMonths <= next.age) {
+                    return {
+                        L: interpolate(ageInMonths, curr.age, curr.L, next.age, next.L),
+                        M: interpolate(ageInMonths, curr.age, curr.M, next.age, next.M),
+                        S: interpolate(ageInMonths, curr.age, curr.S, next.age, next.S)
+                    };
+                }
+            }
+            return null; // Should not happen if age is within range
+        }
+
+        // Calculate Z-score using LMS method
+        function calculateLMSZScore(X, L, M, S) {
+            if (S === 0) return 0; // Avoid division by zero
+            if (L === 0) {
+                return Math.log(X / M) / S;
+            } else {
+                return (Math.pow(X / M, L) - 1) / (L * S);
+            }
+        }
+
+        // Classify status based on Z-score
+        function getStatusFromZScore(zScore, type) {
+            if (isNaN(zScore)) return "N/A";
+
+            switch (type) {
+                case 'WFA': // Weight-for-Age
+                    if (zScore < -3) return "Severe Underweight";
+                    if (zScore < -2) return "Moderate Underweight";
+                    if (zScore > 2) return "Overweight risk";
+                    return "Normal";
+                case 'HFA': // Height-for-Age
+                    if (zScore < -3) return "Severe Stunting";
+                    if (zScore < -2) return "Moderate Stunting";
+                    return "Normal";
+                case 'WFH': // Weight-for-Height (simplified for now)
+                    if (zScore < -3) return "Severe Wasting";
+                    if (zScore < -2) return "Moderate Wasting";
+                    if (zScore > 3) return "Obese";
+                    if (zScore > 2) return "Overweight";
+                    return "Normal";
+                case 'BAZ': // BMI-for-Age
+                    if (zScore < -3) return "Severe Thinness";
+                    if (zScore < -2) return "Thinness (wasting)";
+                    if (zScore > 3) return "Obese";
+                    if (zScore > 2) return "Overweight";
+                    if (zScore > 1) return "Risk of Overweight";
+                    return "Normal";
+                default:
+                    return "N/A";
+            }
+        }
+
+        // 1. Weight-for-Age (WFA)
+        const getWeightForAgeStatus = (ageInMonths, gender, weight) => {
+            const lms = getLMSData('WFA', ageInMonths, gender);
+            if (!lms) return "N/A (No WFA data for age/gender)";
+            const zScore = calculateLMSZScore(weight, lms.L, lms.M, lms.S);
+            return getStatusFromZScore(zScore, 'WFA');
+        };
+
+        // 2. Height/Length-for-Age (HFA/LFA)
+        const getHeightForAgeStatus = (ageInMonths, gender, height) => {
+            const lms = getLMSData('HFA', ageInMonths, gender);
+            if (!lms) return "N/A (No HFA data for age/gender)";
+            const zScore = calculateLMSZScore(height, lms.L, lms.M, lms.S);
+            return getStatusFromZScore(zScore, 'HFA');
+        };
+
+        // 3. Weight-for-Height/Length (WFH/L) - Simplified for demonstration
+        // For full WHO WFH, you need LMS data indexed by height, not age.
+        const getWeightForHeightStatus = (height, weight, gender) => {
+            if (height <= 0 || weight <= 0) return "N/A";
+            const bmi = calculateBMI(weight, height);
+            // This is a simplified classification based on BMI, not true WFH Z-score.
+            // For a more accurate WFH, you'd need a separate LMS table for WFH by height.
+            if (bmi < 13) return "Severe Wasting (BMI-based)";
+            if (bmi < 14) return "Moderate Wasting (BMI-based)";
+            if (bmi > 18) return "Obese (BMI-based)";
+            if (bmi > 17) return "Overweight (BMI-based)";
+            return "Normal (BMI-based)";
+        };
+
+
+        // 4. BMI-for-Age (BAZ)
+        const getBMIForAgeStatus = (ageInMonths, gender, bmi) => {
+            const lms = getLMSData('BAZ', ageInMonths, gender);
+            if (!lms) return "N/A (No BAZ data for age/gender)";
+            const zScore = calculateLMSZScore(bmi, lms.L, lms.M, lms.S);
+            return getStatusFromZScore(zScore, 'BAZ');
+        };
+
+        // 5. Mid-Upper Arm Circumference (MUAC) → (for 6–59 months only)
+        const getMUACStatus = (mauc, ageInMonths) => {
+            if (isNaN(mauc) || mauc <= 0) return "N/A";
+            // WHO MUAC cutoffs for children 6-59 months
+            if (ageInMonths >= 6 && ageInMonths <= 59) {
+                if (mauc < 11.5) return "Severe Acute Malnutrition (SAM)";
+                if (mauc >= 11.5 && mauc < 12.5) return "Moderate Acute Malnutrition (MAM)";
+                return "Normal";
+            }
+            return "N/A (Age not applicable for MUAC assessment)";
+        };
+
+        // Overall Nutritional Status based on all indicators
+        const calculateOverallNutritionalStatus = (ageInMonths, gender, weight, height, mauc) => {
+            const wfaStatus = getWeightForAgeStatus(ageInMonths, gender, weight);
+            const hfaStatus = getHeightForAgeStatus(ageInMonths, gender, height);
+            const wfhStatus = getWeightForHeightStatus(height, weight, gender);
+            const bmiVal = calculateBMI(weight, height);
+            const bazStatus = getBMIForAgeStatus(ageInMonths, gender, parseFloat(bmiVal));
+            const muacStatus = getMUACStatus(mauc, ageInMonths);
+
+            const statuses = [wfaStatus, hfaStatus, wfhStatus, bazStatus, muacStatus].filter(s => s && !s.startsWith("N/A"));
+
+            // Prioritize severe conditions
+            if (statuses.includes("Severe Underweight") || statuses.includes("Severe Stunting") || statuses.includes("Severe Wasting") || statuses.includes("Severe Thinness") || statuses.includes("Severe Acute Malnutrition (SAM)")) {
+                return "Severely Malnourished";
+            }
+            // Then moderate conditions
+            if (statuses.includes("Moderate Underweight") || statuses.includes("Moderate Stunting") || statuses.includes("Moderate Wasting") || statuses.includes("Thinness (wasting)") || statuses.includes("Moderate Acute Malnutrition (MAM)")) {
+                return "Moderately Malnourished";
+            }
+            // Then overweight/obesity
+            if (statuses.includes("Obese") || statuses.includes("Overweight") || statuses.includes("Possible Overweight") || statuses.includes("Overweight risk") || statuses.includes("Risk of Overweight")) {
+                return "Overweight/Obese";
+            }
+            // If none of the above, and there are valid measurements, assume normal
+            if (statuses.length > 0 && statuses.every(s => s.includes("Normal"))) { // Check for "Normal" in status string
+                return "Normal";
+            }
+            return "Awaiting measurements...";
+        };
+
+
+        const calculateBMI = (weight, height) => {
+            if (weight > 0 && height > 0) {
+                const heightInMeters = height / 100;
+                return (weight / (heightInMeters * heightInMeters)).toFixed(2);
+            }
+            return "N/A";
+        };
+
+        // Helper function to format date and time as DD/MM/YYYY, HH:MM AM/PM
+        const formatDateTime = (date) => {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // The hour '0' should be '12'
+            return `${day}/${month}/${year}, ${hours}:${minutes} ${ampm}`;
+        };
+
+        // Update status and BMI on input change for Add Child modal
+        const updateAddFormValues = () => {
+            const weight = parseFloat(weightInput.value);
+            const height = parseFloat(heightInput.value);
+            const mauc = parseFloat(maucInput.value);
+            const dob = dobInput.value;
+            const gender = document.getElementById('gender').value;
+            const age = calculateAge(dob);
+            const ageInMonths = age ? age.months : 0;
+
+            // Calculate individual statuses
+            const wfaStatus = getWeightForAgeStatus(ageInMonths, gender, weight);
+            const hfaStatus = getHeightForAgeStatus(ageInMonths, gender, height);
+            const wfhStatus = getWeightForHeightStatus(height, weight, gender);
+            const bmiVal = calculateBMI(weight, height);
+            const bazStatus = getBMIForAgeStatus(ageInMonths, gender, parseFloat(bmiVal));
+            const muacStatus = getMUACStatus(mauc, ageInMonths);
+
+            // Update display elements in the Add Child modal
+            nutritionalStatusEl.textContent = calculateOverallNutritionalStatus(ageInMonths, gender, weight, height, mauc);
+            bmiValueEl.textContent = bmiVal;
+            wfaStatusEl.textContent = wfaStatus;
+            hfaStatusEl.textContent = hfaStatus;
+            wfhStatusEl.textContent = wfhStatus;
+            bazStatusEl.textContent = bazStatus;
+            muacStatusEl.textContent = muacStatus;
+        };
+
+        weightInput.addEventListener('input', updateAddFormValues);
+        heightInput.addEventListener('input', updateAddFormValues);
+        maucInput.addEventListener('input', updateAddFormValues);
+        dobInput.addEventListener('change', updateAddFormValues); // Also update on DOB change
+        document.getElementById('gender').addEventListener('change', updateAddFormValues); // Also update on gender change
+
+
+        // Update status and BMI on input change for Update Child modal
+        const updateUpdateFormValues = () => {
+            const weight = parseFloat(updateWeightInput.value);
+            const height = parseFloat(updateHeightInput.value);
+            const mauc = parseFloat(updateMaucInput.value);
+
+            const childId = childIdToUpdate.value;
+            const childToUpdate = childrenData.find(child => child.id === childId);
+
+            if (childToUpdate) {
+                const age = calculateAge(childToUpdate.dob);
+                const ageInMonths = age ? age.months : 0;
+                const gender = childToUpdate.gender;
+
+                // Calculate individual statuses for update modal
+                const wfaStatus = getWeightForAgeStatus(ageInMonths, gender, weight);
+                const hfaStatus = getHeightForAgeStatus(ageInMonths, gender, height);
+                const wfhStatus = getWeightForHeightStatus(height, weight, gender);
+                const bmiVal = calculateBMI(weight, height);
+                const bazStatus = getBMIForAgeStatus(ageInMonths, gender, parseFloat(bmiVal));
+                const muacStatus = getMUACStatus(mauc, ageInMonths);
+
+                // Update display elements in the Update Child modal
+                updateNutritionalStatusEl.textContent = calculateOverallNutritionalStatus(ageInMonths, gender, weight, height, mauc);
+                updateBmiValueEl.textContent = bmiVal;
+                updateWfaStatusEl.textContent = wfaStatus;
+                updateHfaStatusEl.textContent = hfaStatus;
+                updateWfhStatusEl.textContent = wfhStatus;
+                updateBazStatusEl.textContent = bazStatus;
+                updateMuacStatusEl.textContent = muacStatus;
+
+            } else {
+                updateNutritionalStatusEl.textContent = "Awaiting measurements...";
+                updateBmiValueEl.textContent = "N/A";
+                updateWfaStatusEl.textContent = "Awaiting measurements...";
+                updateHfaStatusEl.textContent = "Awaiting measurements...";
+                updateWfhStatusEl.textContent = "Awaiting measurements...";
+                updateBazStatusEl.textContent = "Awaiting measurements...";
+                updateMuacStatusEl.textContent = "Awaiting measurements...";
+            }
+        };
+
+        updateWeightInput.addEventListener('input', updateUpdateFormValues);
+        updateHeightInput.addEventListener('input', updateUpdateFormValues);
+        updateMaucInput.addEventListener('input', updateUpdateFormValues);
+
+
+        // Function to render the children table from the childrenData array
+        const renderChildrenTable = () => {
+            childrenTableBody.innerHTML = '';
+            if (childrenData.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `<td colspan="6" class="p-4 text-center text-muted-foreground">No child found. Add a new child data to get started.</td>`;
+                childrenTableBody.appendChild(emptyRow);
+            } else {
+                childrenData.forEach((child, index) => {
+                    const latestMeasurement = child.measurements[child.measurements.length - 1];
+                    const newRow = document.createElement('tr');
+                    newRow.classList.add('border-b', 'transition-colors', 'hover:bg-muted/50');
+
+                    const age = calculateAge(child.dob);
+                    let ageString = '';
+                    if (age.years > 0) {
+                        ageString = `${age.years} yr`;
+                    } else if (age.months > 0) {
+                        ageString = `${age.months} mo`;
+                    } else if (age.weeks > 0) {
+                        ageString = `${age.weeks} wk`;
+                    } else {
+                        ageString = `${age.days} day`;
+                    }
+
+                    newRow.innerHTML = `
+                        <td class="px-4 py-2 align-middle font-medium text-left">${child.name}</td>
+                        <td class="px-4 py-2 align-middle text-left">${ageString}</td>
+                        <td class="px-4 py-2 align-middle text-left">${child.gender}</td>
+                        <td class="px-4 py-2 align-middle text-left">${latestMeasurement.nutritionalStatus}</td>
+                        <td class="px-4 py-2 align-middle text-left">${formatDateTime(new Date(latestMeasurement.dateTime))}</td>
+                        <td class="px-4 py-2 align-middle flex items-center justify-center gap-2">
+                            <button class="view-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-1.5 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground" data-index="${index}">View</button>
+                            <button class="update-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90" data-index="${index}">Update</button>
+                            </td>
+                    `;
+                    childrenTableBody.appendChild(newRow);
+                });
+            }
+        };
+
+        // Handle form submission for adding a new child
+        addChildForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const mauc = parseFloat(document.getElementById('mauc').value);
+            const dob = document.getElementById('dob').value;
+            const gender = document.getElementById('gender').value;
+            const age = calculateAge(dob);
+            const ageInMonths = age ? age.months : 0;
+            const bmiVal = calculateBMI(weight, height);
+
+            const newChild = {
+                id: crypto.randomUUID(),
+                name: document.getElementById('name').value,
+                dob: dob,
+                age: age,
+                gender: gender,
+                barangay: document.getElementById('barangay').value,
+                measurements: [{
+                    weight: weight,
+                    height: height,
+                    mauc: mauc,
+                    nutritionalStatus: calculateOverallNutritionalStatus(ageInMonths, gender, weight, height, mauc),
+                    bmi: bmiVal,
+                    wfaStatus: getWeightForAgeStatus(ageInMonths, gender, weight),
+                    hfaStatus: getHeightForAgeStatus(ageInMonths, gender, height),
+                    wfhStatus: getWeightForHeightStatus(height, weight, gender),
+                    bazStatus: getBMIForAgeStatus(ageInMonths, gender, parseFloat(bmiVal)),
+                    muacStatus: getMUACStatus(mauc, ageInMonths),
+                    dateTime: new Date().toISOString()
+                }]
+            };
+
+            childrenData.push(newChild);
+            renderChildrenTable();
+
+            // Reset the form and close the modal
+            addChildForm.reset();
+            hideModal(modal);
+            updateAddFormValues(); // Reset display values
+        });
+
+        // Handle form submission for updating a child
+        saveUpdateBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const childId = childIdToUpdate.value;
+            const childToUpdate = childrenData.find(child => child.id === childId);
+
+            if (childToUpdate) {
+                const weight = parseFloat(updateWeightInput.value);
+                const height = parseFloat(updateHeightInput.value);
+                const mauc = parseFloat(updateMaucInput.value);
+                const age = calculateAge(childToUpdate.dob);
+                const ageInMonths = age ? age.months : 0;
+                const gender = childToUpdate.gender;
+                const bmiVal = calculateBMI(weight, height);
+
+                childToUpdate.measurements.push({
+                    weight: weight,
+                    height: height,
+                    mauc: mauc,
+                    nutritionalStatus: calculateOverallNutritionalStatus(ageInMonths, gender, weight, height, mauc),
+                    bmi: bmiVal,
+                    wfaStatus: getWeightForAgeStatus(ageInMonths, gender, weight),
+                    hfaStatus: getHeightForAgeStatus(ageInMonths, gender, height),
+                    wfhStatus: getWeightForHeightStatus(height, weight, gender),
+                    bazStatus: getBMIForAgeStatus(ageInMonths, gender, parseFloat(bmiVal)),
+                    muacStatus: getMUACStatus(mauc, ageInMonths),
+                    dateTime: new Date().toISOString()
+                });
+                renderChildrenTable();
+                hideModal(updateModal);
+            }
+        });
+
+        // Function to show/hide views
+        const showView = (viewId) => {
+            dashboardView.classList.add('hidden');
+            childView.classList.add('hidden');
+
+            if (viewId === 'dashboard-view') {
+                dashboardView.classList.remove('hidden');
+            } else if (viewId === 'child-view') {
+                childView.classList.remove('hidden');
+            }
+        };
+
+        // Handle clicks on the table body using event delegation
+        childrenTableBody.addEventListener('click', (e) => {
+            const index = e.target.getAttribute('data-index');
+            const child = childrenData[index];
+
+            if (child) {
+                if (e.target.classList.contains('view-btn')) {
+                    currentChildData = child;
+                    populateChildView(child);
+                    showView('child-view');
+                } else if (e.target.classList.contains('update-btn')) {
+                    childIdToUpdate.value = child.id;
+                    updateChildNameEl.textContent = child.name;
+                    // Clear previous values and trigger recalculation for update modal
+                    updateWeightInput.value = '';
+                    updateHeightInput.value = '';
+                    updateMaucInput.value = '';
+                    updateUpdateFormValues(); // Initialize status/BMI display
+                    updateModal.style.display = 'flex';
+                }
+            }
+        });
+
+        // Populate the child detail view with data
+        const populateChildView = (child) => {
+            const latestMeasurement = child.measurements[child.measurements.length - 1];
+            childInitials.textContent = child.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            childNameDisplay.textContent = child.name;
+            childAgeDisplay.textContent = `Age: ${child.age.years} years, ${child.age.months % 12} months`;
+            childGenderDisplay.textContent = child.gender;
+            childStatusDisplay.textContent = latestMeasurement.nutritionalStatus;
+            childDobDisplay.textContent = child.dob;
+            childBarangayDisplay.textContent = child.barangay;
+            childWeightDisplay.textContent = `${latestMeasurement.weight} kg`;
+            childHeightDisplay.textContent = `${latestMeasurement.height} cm`;
+            childMaucDisplay.textContent = `${latestMeasurement.mauc} cm`;
+            childBmiDisplay.textContent = `${latestMeasurement.bmi}`;
+            childDatetimeDisplay.textContent = formatDateTime(new Date(latestMeasurement.dateTime));
+
+            // Populate individual statuses in child detail view
+            childWfaDisplay.textContent = latestMeasurement.wfaStatus;
+            childHfaDisplay.textContent = latestMeasurement.hfaStatus;
+            childWfhDisplay.textContent = latestMeasurement.wfhStatus;
+            childBazDisplay.textContent = latestMeasurement.bazStatus;
+            childMuacStatusDisplay.textContent = latestMeasurement.muacStatus;
+
+
+            // Render the separate charts with default view (All Time)
+            renderWeightChart(child);
+            renderHeightChart(child);
+            renderMaucChart(child);
+            renderBMIChart(child);
+        };
+
+        const filterMeasurementsByTime = (measurements, timeRange) => {
+            const now = new Date();
+            let startDate = new Date(); // Use a new Date object to avoid modifying the original 'now'
+
+            if (timeRange === '6months') {
+                startDate.setMonth(now.getMonth() - 6);
+            } else if (timeRange === '12months') {
+                startDate.setMonth(now.getMonth() - 12);
+            } else {
+                return measurements; // "all"
+            }
+
+            return measurements.filter(m => new Date(m.dateTime) >= startDate);
+        };
+
+        const renderWeightChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (weightChart) {
+                weightChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const weightData = filteredMeasurements.map(m => m.weight);
+
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Weight (kg)',
+                            data: weightData,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(75, 192, 192)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(75, 192, 192)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Weight Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Weight (kg)' }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderHeightChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (heightChart) {
+                heightChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const heightData = filteredMeasurements.map(m => m.height);
+
+            const ctx = document.getElementById('heightChart').getContext('2d');
+            heightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Height (cm)',
+                            data: heightData,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(255, 99, 132)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(255, 99, 132)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Height Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Height (cm)' }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderMaucChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (maucChart) {
+                maucChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const maucData = filteredMeasurements.map(m => m.mauc);
+
+            const ctx = document.getElementById('maucChart').getContext('2d');
+            maucChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'MUAC (cm)',
+                            data: maucData,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(54, 162, 235)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(54, 162, 235)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'MUAC Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'MUAC (cm)' }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderBMIChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (bmiChart) {
+                bmiChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const bmiData = filteredMeasurements.map(m => parseFloat(m.bmi));
+
+            const ctx = document.getElementById('bmiChart').getContext('2d');
+            bmiChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'BMI ',
+                            data: bmiData,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(153, 102, 255)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(153, 102, 255)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'BMI Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'BMI' }
+                        }
+                    }
+                }
+            });
+        };
+
+
+        // Event listener for time range dropdown
+        chartTimeRangeSelect.addEventListener('change', () => {
+            if (currentChildData) {
+                renderWeightChart(currentChildData);
+                renderHeightChart(currentChildData);
+                renderMaucChart(currentChildData);
+                renderBMIChart(currentChildData);
+            }
+        });
+
+        // Back button event listener
+        backBtn.addEventListener('click', () => {
+            showView('dashboard-view');
+        });
+
+        // Filter the table based on search input
+        searchInput.addEventListener('keyup', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = childrenTableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const nameCell = row.cells[0];
+                if (nameCell) {
+                    const name = nameCell.textContent.toLowerCase();
+                    if (name.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        // Initial render on page load
+        renderChildrenTable();
+    </script>
+</body>
+
+</html>

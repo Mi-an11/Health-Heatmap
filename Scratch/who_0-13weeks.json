@@ -1,0 +1,54 @@
+{
+    "WFA": {    
+        "Male": [
+            { "weeks": 0, "value1": 0.3487, "value2": 3.3464, "value3": 0.14602 },
+            { "weeks": 1, "value1": 0.2776, "value2": 3.4879, "value3": 0.14483 },
+            { "weeks": 2, "value1": 0.2581, "value2": 3.7529, "value3": 0.14142 },
+            { "weeks": 3, "value1": 0.2442, "value2": 4.0603, "value3": 0.13807 },
+            { "weeks": 4, "value1": 0.2331, "value2": 4.3671, "value3": 0.13497 },
+            { "weeks": 5, "value1": 0.2237, "value2": 4.659,  "value3": 0.13215 },
+            { "weeks": 6, "value1": 0.2155, "value2": 4.9303, "value3": 0.1296 },
+            { "weeks": 7, "value1": 0.2081, "value2": 5.1817, "value3": 0.12729 },
+            { "weeks": 8, "value1": 0.2014, "value2": 5.4149, "value3": 0.1252 },
+            { "weeks": 9, "value1": 0.1952, "value2": 5.6319, "value3": 0.1233 },
+            { "weeks": 10, "value1": 0.1894, "value2": 5.8346, "value3": 0.12157 },
+            { "weeks": 11, "value1": 0.184,  "value2": 6.0242, "value3": 0.12001 },
+            { "weeks": 12, "value1": 0.1789, "value2": 6.2019, "value3": 0.1186 },
+            { "weeks": 13, "value1": 0.174,  "value2": 6.369,  "value3": 0.11732 }
+          ],
+        "Female": [
+            { "weeks": 0, "value1": 0.3809, "value2": 3.2322, "value3": 0.14171 },
+            { "weeks": 1, "value1": 0.2671, "value2": 3.3388, "value3": 0.146 },
+            { "weeks": 2, "value1": 0.2304, "value2": 3.5693, "value3": 0.14339 },
+            { "weeks": 3, "value1": 0.2024, "value2": 3.8352, "value3": 0.1406 },
+            { "weeks": 4, "value1": 0.1789, "value2": 4.0987, "value3": 0.13805 },
+            { "weeks": 5, "value1": 0.1582, "value2": 4.3476, "value3": 0.13583 },
+            { "weeks": 6, "value1": 0.1395, "value2": 4.5793, "value3": 0.13392 },
+            { "weeks": 7, "value1": 0.1224, "value2": 4.795,  "value3": 0.13228 },
+            { "weeks": 8, "value1": 0.1065, "value2": 4.9959, "value3": 0.13087 },
+            { "weeks": 9, "value1": 0.0918, "value2": 5.1842, "value3": 0.12966 },
+            { "weeks": 10, "value1": 0.0779, "value2": 5.3618, "value3": 0.12861 },
+            { "weeks": 11, "value1": 0.0648, "value2": 5.5295, "value3": 0.1277 },
+            { "weeks": 12, "value1": 0.0525, "value2": 5.6883, "value3": 0.12691 },
+            { "weeks": 13, "value1": 0.0407, "value2": 5.8393, "value3": 0.12622 }
+          ]
+    },
+    "HFA":{
+        "Male":
+        [],
+        "Female":
+        []   
+    },
+    "WFH":{
+        "Male":[],
+        "Female":[]
+    },
+    "BAZ":{
+        "Male":[],
+        "Female":[]
+    },
+    "MUAC":{
+        "Male":[],
+        "Female":[]
+    }
+}

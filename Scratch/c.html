@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Malnutrition Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: white;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="hidden md:flex flex-col w-64 bg-card border-r border-border h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">Child Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Health Worker Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="workerDashboard.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a href="childMonitoring.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building-2 w-5 h-5 mr-3">
+                    <path d="M6 22V7H4v15c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M10 22V3h-2v19c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M14 22V9h-2v13c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M18 22V11h-2v11c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                </svg>
+                <span class="flex-1 text-left">Child Monitoring Module</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Mi-an Dulalia</p>
+                    <p class="text-xs text-muted-foreground">Health Worker</p>
+                </div>
+            </div>
+            <button
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucude-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-y-auto">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-foreground">Child Monitoring</h1>
+                    <p class="text-sm text-muted-foreground">Comprehensive child health record management and tracking
+                        system</p>
+                </div>
+                <!-- Add New Child Button -->
+                <button id="add-child-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-4 h-4 mr-2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Add New Child
+                </button>
+            </div>
+
+            <!-- Tabs/Search Section -->
+            <div class="space-y-4">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 md:gap-4">
+                    <div class="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                        <div class="relative w-full md:w-64">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <input type="text" id="searchInput" placeholder="Search children..." class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10">
+                        </div>
+                        <div class="relative w-full md:w-40">
+                            <button class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1">
+                                <span>All Status</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 shrink-0 opacity-50"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Table for List of children-->
+                <div class="rounded-xl border bg-card text-card-foreground shadow w-full">
+                    <div class="p-4 md:p-6">
+                        <div id="List" class="relative w-full overflow-auto">
+                            <table class="w-full caption-bottom text-sm">
+                                <thead class="[&amp;_tr]:border-b">
+                                    <tr class=" border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 w-[150px]">Name</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Age</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Gender</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Nutritional Status</th>
+                                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Date/Time Added</th>
+                                        <th class="h-12 px-4 text-center align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 w-[150px]">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="children-table-body" class="[&amp;_tr:last-child]:border-0">
+                                    <!-- Dynamic rows will be added here by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Child Detail View -->
+        <div id="child-view" class="hidden p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
+            <button id="back-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-4 h-4 mr-2"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Dashboard
+            </button>
+            <div class="rounded-xl border bg-card text-card-foreground shadow w-full p-4 md:p-6 space-y-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-xl font-bold text-primary-foreground">
+                        <span id="child-initials"></span>
+                    </div>
+                    <div class="space-y-1">
+                        <h2 id="child-name-display" class="text-2xl font-semibold text-foreground"></h2>
+                        <p id="child-age-display" class="text-sm text-muted-foreground"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Gender</h4>
+                        <p id="child-gender-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Nutritional Status</h4>
+                        <p id="child-status-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Date of Birth</h4>
+                        <p id="child-dob-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Barangay</h4>
+                        <p id="child-barangay-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Weight (kg)</h4>
+                        <p id="child-weight-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Height (cm)</h4>
+                        <p id="child-height-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">MUAC (cm)</h4>
+                        <p id="child-mauc-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">BMI ($$kg/m^2$$)</h4>
+                        <p id="child-bmi-display" class="font-semibold text-foreground"></p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-medium text-muted-foreground">Data Added On</h4>
+                        <p id="child-datetime-display" class="font-semibold text-foreground"></p>
+                    </div>
+                </div>
+
+                <!-- Growth Chart Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-semibold text-foreground">Growth Charts</h3>
+                        <select id="chart-time-range" class="flex h-9 w-40 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm">
+                            <option value="all">All Time</option>
+                            <option value="6months">Last 6 Months</option>
+                            <option value="12months">Last 12 Months</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="weightChart"></canvas>
+                        </div>
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="heightChart"></canvas>
+                        </div>
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="maucChart"></canvas>
+                        </div>
+                        <div class="rounded-lg border p-4 h-96">
+                            <canvas id="bmiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add Child Modal -->
+    <div id="add-child-modal" class="modal-overlay">
+        <div class="relative w-full max-w-2xl mx-auto rounded-lg shadow-lg bg-white overflow-hidden m-4">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-xl font-semibold">Add New Child</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-x w-6 h-6">
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6L18 18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[80vh]">
+                <form id="add-child-form" class="space-y-6">
+                    <!-- Personal Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" id="name" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                            <input type="date" id="dob" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                        </div>
+                        <!-- Age Calculation Display -->
+                        <div class="flex flex-col space-y-2 col-span-1 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Calculated Age</label>
+                            <div id="calculated-age" class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Please select a date of birth...
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                            <select id="gender" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2 col-span-1">
+                            <label for="barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                            <select id="barangay" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                <option value="" disabled selected>Select a Barangay</option>
+                                <option value="Biking">Biking</option>
+                                <option value="Bingag">Bingag</option>
+                                <option value="Bitaog">Bitaog</option>
+                                <option value="Booy">Booy</option>
+                                <option value="Can-Ubay">Can-Ubay</option>
+                                <option value="Catagbacan">Catagbacan</option>
+                                <option value="Poblacion">Poblacion</option>
+                                <option value="Tuna">Tuna</option>
+                                <option value="Totolan">Totolan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Anthropometric Measurements -->
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-foreground">Anthropometric Measurements</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-2">
+                                <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                                <input type="number" step="0.1" id="weight" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="height" class="block text-sm font-medium text-gray-700">Height (cm)</label>
+                                <input type="number" step="0.1" id="height" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="mauc" class="block text-sm font-medium text-gray-700">MUAC (cm)</label>
+                                <input type="number" step="0.1" id="mauc" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nutritional Status and BMI -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col space-y-2">
+                            <label for="nutritional-status" class="block text-sm font-medium text-gray-700">Nutritional Status</label>
+                            <div id="nutritional-status" class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label for="bmi-value" class="block text-sm font-medium text-gray-700">BMI</label>
+                            <div id="bmi-value" class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end p-4 border-t gap-2">
+                <button id="cancel-modal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground">Cancel</button>
+                <button id="save-child-btn" type="submit" form="add-child-form" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Save Child</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Child Modal -->
+    <div id="update-child-modal" class="modal-overlay">
+        <div class="relative w-full max-w-2xl mx-auto rounded-lg shadow-lg bg-white overflow-hidden m-4">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="text-xl font-semibold">Add New Measurement</h3>
+                <button id="close-update-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-x w-6 h-6">
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6L18 18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[80vh]">
+                <form id="update-child-form" class="space-y-6">
+                    <input type="hidden" id="child-id-to-update">
+                    <p id="update-child-name" class="text-lg font-medium"></p>
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-foreground">New Anthropometric Measurements</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-2">
+                                <label for="update-weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                                <input type="number" step="0.1" id="update-weight" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="update-height" class="block text-sm font-medium text-gray-700">Height (cm)</label>
+                                <input type="number" step="0.1" id="update-height" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="update-mauc" class="block text-sm font-medium text-gray-700">MUAC (cm)</label>
+                                <input type="number" step="0.1" id="update-mauc" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col space-y-2">
+                            <label for="update-nutritional-status" class="block text-sm font-medium text-gray-700">Nutritional Status</label>
+                            <div id="update-nutritional-status" class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <label for="update-bmi-value" class="block text-sm font-medium text-gray-700">BMI </label>
+                            <div id="update-bmi-value" class="h-10 px-3 py-2 text-sm rounded-md bg-muted text-muted-foreground flex items-center">
+                                Awaiting measurements...
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end p-4 border-t gap-2">
+                <button id="cancel-update-modal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground">Cancel</button>
+                <button id="save-update-btn" type="submit" form="update-child-form" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Save Update</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const addChildBtn = document.getElementById('add-child-btn');
+        const modal = document.getElementById('add-child-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelModalBtn = document.getElementById('cancel-modal-btn');
+        const saveChildBtn = document.getElementById('save-child-btn');
+        const weightInput = document.getElementById('weight');
+        const heightInput = document.getElementById('height');
+        const maucInput = document.getElementById('mauc');
+        const nutritionalStatusEl = document.getElementById('nutritional-status');
+        const bmiValueEl = document.getElementById('bmi-value');
+        const addChildForm = document.getElementById('add-child-form');
+        const childrenTableBody = document.getElementById('children-table-body');
+        const searchInput = document.getElementById('searchInput');
+
+        // Main views
+        const dashboardView = document.getElementById('dashboard-view');
+        const childView = document.getElementById('child-view');
+        const backBtn = document.getElementById('back-btn');
+
+        // Child detail view elements
+        const childNameDisplay = document.getElementById('child-name-display');
+        const childAgeDisplay = document.getElementById('child-age-display');
+        const childGenderDisplay = document.getElementById('child-gender-display');
+        const childStatusDisplay = document.getElementById('child-status-display');
+        const childDobDisplay = document.getElementById('child-dob-display');
+        const childBarangayDisplay = document.getElementById('child-barangay-display');
+        const childWeightDisplay = document.getElementById('child-weight-display');
+        const childHeightDisplay = document.getElementById('child-height-display');
+        const childMaucDisplay = document.getElementById('child-mauc-display');
+        const childBmiDisplay = document.getElementById('child-bmi-display');
+        const childDatetimeDisplay = document.getElementById('child-datetime-display');
+        const childInitials = document.getElementById('child-initials');
+
+        // Update modal elements
+        const updateModal = document.getElementById('update-child-modal');
+        const closeUpdateModalBtn = document.getElementById('close-update-modal-btn');
+        const cancelUpdateModalBtn = document.getElementById('cancel-update-modal-btn');
+        const updateChildNameEl = document.getElementById('update-child-name');
+        const updateWeightInput = document.getElementById('update-weight');
+        const updateHeightInput = document.getElementById('update-height');
+        const updateMaucInput = document.getElementById('update-mauc');
+        const updateNutritionalStatusEl = document.getElementById('update-nutritional-status');
+        const updateBmiValueEl = document.getElementById('update-bmi-value');
+        const saveUpdateBtn = document.getElementById('save-update-btn');
+        const childIdToUpdate = document.getElementById('child-id-to-update');
+        const chartTimeRangeSelect = document.getElementById('chart-time-range');
+        
+        // New elements for age calculation
+        const dobInput = document.getElementById('dob');
+        const calculatedAgeEl = document.getElementById('calculated-age');
+
+        // Store child data (mock database)
+        const childrenData = [];
+
+        // Global variables for Chart instances
+        let weightChart, heightChart, maucChart, bmiChart;
+        let currentChildData = null;
+
+        // Show modal
+        addChildBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        // Hide modal
+        const hideModal = (modalEl) => {
+            modalEl.style.display = 'none';
+        };
+        closeModalBtn.addEventListener('click', () => hideModal(modal));
+        cancelModalBtn.addEventListener('click', () => hideModal(modal));
+        closeUpdateModalBtn.addEventListener('click', () => hideModal(updateModal));
+        cancelUpdateModalBtn.addEventListener('click', () => hideModal(updateModal));
+
+        // Hide modal if user clicks outside of it
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal(modal);
+            }
+        });
+
+        updateModal.addEventListener('click', (e) => {
+            if (e.target === updateModal) {
+                hideModal(updateModal);
+            }
+        });
+
+        // Function to calculate age from DOB
+        const calculateAge = (dob) => {
+            const birthDate = new Date(dob);
+            if (isNaN(birthDate.getTime())) {
+                return null;
+            }
+            const today = new Date();
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            let days = today.getDate() - birthDate.getDate();
+
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+            const totalWeeks = Math.floor(totalDays / 7);
+            const totalMonths = years * 12 + months;
+
+            return {
+                years: years,
+                months: totalMonths,
+                weeks: totalWeeks,
+                days: totalDays,
+            };
+        };
+        
+        // Event listener for date of birth input to automatically display age breakdown
+        const updateAgeDisplay = () => {
+            const dob = dobInput.value;
+            const age = calculateAge(dob);
+        
+            if (age) {
+                let ageString = '';
+                if (age.years > 0) {
+                    ageString = `${age.years} year${age.years > 1 ? 's' : ''}`;
+                } else if (age.months > 0) {
+                    ageString = `${age.months} month${age.months > 1 ? 's' : ''}`;
+                } else if (age.weeks > 0) {
+                    ageString = `${age.weeks} week${age.weeks > 1 ? 's' : ''}`;
+                } else {
+                    ageString = `${age.days} day${age.days > 1 ? 's' : ''}`;
+                }
+                calculatedAgeEl.textContent = ageString;
+            } else {
+                calculatedAgeEl.textContent = 'Please select a date of birth...';
+            }
+        };
+
+        dobInput.addEventListener('change', updateAgeDisplay);
+
+        // Simplified nutritional status calculation
+        const calculateNutritionalStatus = (mauc) => {
+            if (mauc > 0) {
+                if (mauc < 11.5) {
+                    return "Severely Acute Malnutrition (SAM)";
+                } else if (mauc >= 11.5 && mauc < 12.5) {
+                    return "Moderately Acute Malnutrition (MAM)";
+                } else if (mauc >= 12.5) {
+                    return "Normal";
+                }
+            }
+            return "Awaiting measurements...";
+        };
+        
+        const calculateBMI = (weight, height) => {
+            if (weight > 0 && height > 0) {
+                const heightInMeters = height / 100;
+                return (weight / (heightInMeters * heightInMeters)).toFixed(2);
+            }
+            return "N/A";
+        };
+        
+        // Helper function to format date and time as DD/MM/YYYY, HH:MM AM/PM
+        const formatDateTime = (date) => {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // The hour '0' should be '12'
+            return `${day}/${month}/${year}, ${hours}:${minutes} ${ampm}`;
+        };
+
+        // Update status and BMI on input change for Add Child modal
+        const updateAddFormValues = () => {
+            const weight = parseFloat(weightInput.value);
+            const height = parseFloat(heightInput.value);
+            const mauc = parseFloat(maucInput.value);
+
+            const status = calculateNutritionalStatus(mauc);
+            nutritionalStatusEl.textContent = status;
+            
+            const bmi = calculateBMI(weight, height);
+            bmiValueEl.textContent = bmi;
+        };
+
+        weightInput.addEventListener('input', updateAddFormValues);
+        heightInput.addEventListener('input', updateAddFormValues);
+        maucInput.addEventListener('input', updateAddFormValues);
+        
+        // Update status and BMI on input change for Update Child modal
+        const updateUpdateFormValues = () => {
+            const weight = parseFloat(updateWeightInput.value);
+            const height = parseFloat(updateHeightInput.value);
+            const mauc = parseFloat(updateMaucInput.value);
+
+            const status = calculateNutritionalStatus(mauc);
+            updateNutritionalStatusEl.textContent = status;
+
+            const bmi = calculateBMI(weight, height);
+            updateBmiValueEl.textContent = bmi;
+        };
+
+        updateWeightInput.addEventListener('input', updateUpdateFormValues);
+        updateHeightInput.addEventListener('input', updateUpdateFormValues);
+        updateMaucInput.addEventListener('input', updateUpdateFormValues);
+
+
+        // Function to render the children table from the childrenData array
+        const renderChildrenTable = () => {
+            childrenTableBody.innerHTML = '';
+            childrenData.forEach((child, index) => {
+                const latestMeasurement = child.measurements[child.measurements.length - 1];
+                const newRow = document.createElement('tr');
+                newRow.classList.add('border-b', 'transition-colors', 'hover:bg-muted/50');
+                
+                const age = calculateAge(child.dob);
+                let ageString = '';
+                if (age.years > 0) {
+                    ageString = `${age.years} yr`;
+                } else if (age.months > 0) {
+                    ageString = `${age.months} mo`;
+                } else if (age.weeks > 0) {
+                    ageString = `${age.weeks} wk`;
+                } else {
+                    ageString = `${age.days} day`;
+                }
+
+                newRow.innerHTML = `
+                    <td class="px-4 py-2 align-middle font-medium text-left">${child.name}</td>
+                    <td class="px-4 py-2 align-middle text-left">${ageString}</td>
+                    <td class="px-4 py-2 align-middle text-left">${child.gender}</td>
+                    <td class="px-4 py-2 align-middle text-left">${latestMeasurement.nutritionalStatus}</td>
+                    <td class="px-4 py-2 align-middle text-left">${formatDateTime(new Date(latestMeasurement.dateTime))}</td>
+                    <td class="px-4 py-2 align-middle flex items-center justify-center gap-2">
+                        <button class="view-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-1.5 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground" data-index="${index}">View</button>
+                        <button class="update-btn inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90" data-index="${index}">Update</button>
+                    </td>
+                `;
+                childrenTableBody.appendChild(newRow);
+            });
+        };
+
+        // Handle form submission for adding a new child
+        addChildForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const newChild = {
+                id: crypto.randomUUID(),
+                name: document.getElementById('name').value,
+                dob: document.getElementById('dob').value,
+                age: calculateAge(document.getElementById('dob').value),
+                gender: document.getElementById('gender').value,
+                barangay: document.getElementById('barangay').value,
+                measurements: [{
+                    weight: parseFloat(document.getElementById('weight').value),
+                    height: parseFloat(document.getElementById('height').value),
+                    mauc: parseFloat(document.getElementById('mauc').value),
+                    nutritionalStatus: nutritionalStatusEl.textContent,
+                    bmi: bmiValueEl.textContent,
+                    dateTime: new Date().toISOString()
+                }]
+            };
+
+            childrenData.push(newChild);
+            renderChildrenTable();
+            
+            // Reset the form and close the modal
+            addChildForm.reset();
+            hideModal(modal);
+            updateAddFormValues();
+        });
+
+        // Handle form submission for updating a child
+        saveUpdateBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const childId = childIdToUpdate.value;
+            const childToUpdate = childrenData.find(child => child.id === childId);
+
+            if (childToUpdate) {
+                childToUpdate.measurements.push({
+                    weight: parseFloat(updateWeightInput.value),
+                    height: parseFloat(updateHeightInput.value),
+                    mauc: parseFloat(updateMaucInput.value),
+                    nutritionalStatus: updateNutritionalStatusEl.textContent,
+                    bmi: updateBmiValueEl.textContent,
+                    dateTime: new Date().toISOString()
+                });
+                renderChildrenTable();
+                hideModal(updateModal);
+            }
+        });
+
+        // Function to show/hide views
+        const showView = (viewId) => {
+            dashboardView.classList.add('hidden');
+            childView.classList.add('hidden');
+
+            if (viewId === 'dashboard-view') {
+                dashboardView.classList.remove('hidden');
+            } else if (viewId === 'child-view') {
+                childView.classList.remove('hidden');
+            }
+        };
+
+        // Handle clicks on the table body using event delegation
+        childrenTableBody.addEventListener('click', (e) => {
+            const index = e.target.getAttribute('data-index');
+            const child = childrenData[index];
+
+            if (child) {
+                if (e.target.classList.contains('view-btn')) {
+                    currentChildData = child;
+                    populateChildView(child);
+                    showView('child-view');
+                } else if (e.target.classList.contains('update-btn')) {
+                    childIdToUpdate.value = child.id;
+                    updateChildNameEl.textContent = child.name;
+                    updateModal.style.display = 'flex';
+                }
+            }
+        });
+        
+        // Populate the child detail view with data
+        const populateChildView = (child) => {
+            const latestMeasurement = child.measurements[child.measurements.length - 1];
+            childInitials.textContent = child.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            childNameDisplay.textContent = child.name;
+            childAgeDisplay.textContent = `Age: ${child.age.years} years, ${child.age.months % 12} months`;
+            childGenderDisplay.textContent = child.gender;
+            childStatusDisplay.textContent = latestMeasurement.nutritionalStatus;
+            childDobDisplay.textContent = child.dob;
+            childBarangayDisplay.textContent = child.barangay;
+            childWeightDisplay.textContent = `${latestMeasurement.weight} kg`;
+            childHeightDisplay.textContent = `${latestMeasurement.height} cm`;
+            childMaucDisplay.textContent = `${latestMeasurement.mauc} cm`;
+            childBmiDisplay.textContent = `${latestMeasurement.bmi}`;
+            childDatetimeDisplay.textContent = formatDateTime(new Date(latestMeasurement.dateTime));
+            
+            // Render the separate charts with default view (All Time)
+            renderWeightChart(child);
+            renderHeightChart(child);
+            renderMaucChart(child);
+            renderBMIChart(child);
+        };
+
+        const filterMeasurementsByTime = (measurements, timeRange) => {
+            const now = new Date();
+            let startDate = new Date(); // Use a new Date object to avoid modifying the original 'now'
+
+            if (timeRange === '6months') {
+                startDate.setMonth(now.getMonth() - 6);
+            } else if (timeRange === '12months') {
+                startDate.setMonth(now.getMonth() - 12);
+            } else {
+                return measurements; // "all"
+            }
+            
+            return measurements.filter(m => new Date(m.dateTime) >= startDate);
+        };
+        
+        const renderWeightChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (weightChart) {
+                weightChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const weightData = filteredMeasurements.map(m => m.weight);
+            
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Weight (kg)',
+                            data: weightData,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(75, 192, 192)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(75, 192, 192)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Weight Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Weight (kg)' }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderHeightChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (heightChart) {
+                heightChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const heightData = filteredMeasurements.map(m => m.height);
+            
+            const ctx = document.getElementById('heightChart').getContext('2d');
+            heightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Height (cm)',
+                            data: heightData,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(255, 99, 132)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(255, 99, 132)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Height Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Height (cm)' }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderMaucChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (maucChart) {
+                maucChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const maucData = filteredMeasurements.map(m => m.mauc);
+            
+            const ctx = document.getElementById('maucChart').getContext('2d');
+            maucChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'MUAC (cm)',
+                            data: maucData,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(54, 162, 235)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(54, 162, 235)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'MUAC Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'MUAC (cm)' }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderBMIChart = (child) => {
+            const timeRange = chartTimeRangeSelect.value;
+            const filteredMeasurements = filterMeasurementsByTime(child.measurements, timeRange);
+
+            if (bmiChart) {
+                bmiChart.destroy();
+            }
+
+            const labels = filteredMeasurements.map(m => new Date(m.dateTime).toLocaleDateString());
+            const bmiData = filteredMeasurements.map(m => parseFloat(m.bmi));
+            
+            const ctx = document.getElementById('bmiChart').getContext('2d');
+            bmiChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'BMI ',
+                            data: bmiData,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(153, 102, 255)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(153, 102, 255)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'BMI Growth',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'BMI' }
+                        }
+                    }
+                }
+            });
+        };
+
+
+        // Event listener for time range dropdown
+        chartTimeRangeSelect.addEventListener('change', () => {
+            if (currentChildData) {
+                renderWeightChart(currentChildData);
+                renderHeightChart(currentChildData);
+                renderMaucChart(currentChildData);
+                renderBMIChart(currentChildData);
+            }
+        });
+
+        // Back button event listener
+        backBtn.addEventListener('click', () => {
+            showView('dashboard-view');
+        });
+
+        // Filter the table based on search input
+        searchInput.addEventListener('keyup', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = childrenTableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const nameCell = row.cells[0];
+                if (nameCell) {
+                    const name = nameCell.textContent.toLowerCase();
+                    if (name.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        // Initial render on page load
+        renderChildrenTable();
+
+    </script>
+</body>
+</html>

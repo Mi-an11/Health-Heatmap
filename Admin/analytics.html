@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: white;
+        }
+
+        .progress-background {
+            height: 0.5rem;
+            width: 100%;
+            border-radius: 9999px;
+            background-color: rgba(34, 38, 45, 0.2);
+        }
+
+        .progress-foreground {
+            height: 100%;
+            border-radius: 9999px;
+            background-color: #0e1e2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #f0f4f8;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+
+        .dropdown-content {
+            display: none;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-card border-r border-border flex flex-col h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">LGU Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="adminDashboard.html"
+                class= "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a href="barangayManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building-2 w-5 h-5 mr-3">
+                    <path d="M6 22V7H4v15c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M10 22V3h-2v19c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M14 22V9h-2v13c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M18 22V11h-2v11c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                </svg>
+                <span class="flex-1 text-left">Barangay Management</span>
+            </a>
+            <a href="analytics.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-bar-chart-3 w-5 h-5 mr-3">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span class="flex-1 text-left">Analytics</span>
+            </a>
+            <a href="userManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-users w-5 h-5 mr-3">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="flex-1 text-left">User Management</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Sibalom LGU</p>
+                    <p class="text-xs text-muted-foreground">Administrator</p>
+                </div>
+            </div>
+            <a href="../Landing Page/landingPage.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto">
+        <div class="p-6 space-y-5">
+            <!-- Header Section with Export and Filter -->
+            <div class="flex items-center justify-between rounded-lg">
+                <div>
+                    <h1 class="text-2xl font-semibold text-foreground">Analytics</h1>
+                    <p class="text-sm text-muted-foreground">Real-time monitoring across 76 barangays</p>
+                </div>
+                <!-- Aligned Export and Filter buttons -->
+                <div class="flex items-center gap-2">
+                    <button id="exportButton"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-plus w-4 h-4 mr-2">
+                            <path d="M12 5v14" />
+                            <path d="M5 12h14" />
+                        </svg>
+                        Export Report
+                    </button>
+                    <!-- Filter Dropdown -->
+                    <div class="relative w-40">
+                        <button id="filterButton"
+                            class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1">
+                            <span id="filterLabel">All Status</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 shrink-0 opacity-50">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div id="filterDropdown"
+                            class="dropdown-content absolute z-10 w-full mt-1 rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition-all">
+                            <div data-value="all"
+                                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50">
+                                All Status</div>
+                            <div data-value="normal"
+                                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50">
+                                Normal</div>
+                            <div data-value="at-risk"
+                                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50">
+                                At-Risk</div>
+                            <div data-value="critical"
+                                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50">
+                                Critical</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Barangays</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-map-pin h-4 w-4 text-muted-foreground">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div id="totalBarangays" class="text-2xl font-bold">76</div>
+                        <p class="text-xs text-muted-foreground">Complete coverage area</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Cases</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-users h-4 w-4 text-muted-foreground">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div id="totalCases" class="text-2xl font-bold">0</div>
+                        <p class="text-xs text-muted-foreground">Active malnutrition cases</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Critical Areas</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-alert-triangle h-4 w-4 text-destructive">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                            <path d="M12 9v4" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div id="criticalAreas" class="text-2xl font-bold text-destructive">0</div>
+                        <p class="text-xs text-muted-foreground">Immediate intervention needed</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">At-Risk Areas</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-trending-up h-4 w-4 text-yellow-600">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                            <polyline points="16 7 22 7 22 13" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div id="atRiskAreas" class="text-2xl font-bold text-yellow-600">0</div>
+                        <p class="text-xs text-muted-foreground">Monitoring required</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Normal Areas</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-zap h-4 w-4 text-green-600">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div id="normalAreas" class="text-2xl font-bold text-green-600">0</div>
+                        <p class="text-xs text-muted-foreground">Stable conditions</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- New grid for charts and recent activities -->
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-5">
+                <!-- Malnutrition Cases Chart -->
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-col space-y-1.5 p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h6 class="text-lg font-semibold">Malnutrition Cases by Barangay</h6>
+                                <p class="text-sm text-muted-foreground">By category in your barangay</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <canvas id="nutritionBarChart" class="w-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Severity Status Chart -->
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-col space-y-1.5 p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h6 class="text-lg font-semibold">Overall Barangay Severity</h6>
+                                <p class="text-sm text-muted-foreground">By category in your barangay</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0 h-[300px] overflow-y-auto">
+                        <canvas id="statusBarChart" class="w-full"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const BARANGAYS = [
+           "Alangan", "Bari", "Biga-a", "Bongbongan I", "Bongbongan II", "Bongsod", "Bontol", "Bugnay", "Bulalacao",
+            "Cabanbanan", "Cabariuan", "Cabladan", "Cadoldolan", "Calog", "Calo-oy", "Catmon", "Catungan I", "Catungan II",
+            "Catungan III", "Catungan IV", "Cubay-Napultan", "Cubay-Sermon", "District I", "District II", "District III",
+            "District IV", "Egaña", "Esperanza I", "Esperanza II", "Esperanza III", "Igcococ", "Igdagmay", "Igdalaquit",
+            "Iglanot", "Igpanolong", "Igparas", "Igsuming", "Ilabas", "Imparayan", "Inabasan", "Indag-an", "Initan",
+            "Insarayan", "Lacaron", "Lagdo", "Lambayagan", "Luna", "Luyang", "Maasin", "Mabini", "Millamena", "Mojon",
+            "Nagdayao", "Nazareth", "Odiong", "Olaga", "Pangpang", "Panlagangan", "Pantao", "Pasong", "Pis-anan", "Rombang",
+            "Salvacion", "San Juan", "Sido", "Solong", "Tabongtabong", "Tigbalua I", "Tigbalua II", "Tig-ohot",
+            "Tordesillas", "Tulatula", "Valentin Grasparil", "Villafont", "Villahermosa", "Villar"
+        ];
+
+        let allData = [];
+        let nutritionChart = null;
+        let severityChart = null;
+        let currentFilter = 'all';
+
+        // Function to generate mock data for 76 barangays
+        function generateMockData() {
+            const barangays = [];
+            const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+            for (let i = 0; i < BARANGAYS.length; i++) {
+                const totalCases = getRandomInt(50, 200);
+                const stunting = getRandomInt(0, totalCases);
+                const wasting = getRandomInt(0, totalCases - stunting);
+                const underweight = getRandomInt(0, totalCases - stunting - wasting);
+                const overweight = totalCases - stunting - wasting - underweight;
+
+                let severity;
+                if (totalCases > 150) {
+                    severity = 'critical';
+                } else if (totalCases > 100) {
+                    severity = 'at-risk';
+                } else {
+                    severity = 'normal';
+                }
+
+                barangays.push({
+                    name: BARANGAYS[i],
+                    stunting: stunting,
+                    wasting: wasting,
+                    underweight: underweight,
+                    overweight: overweight,
+                    totalCases: totalCases,
+                    severity: severity
+                });
+            }
+            return barangays;
+        }
+
+        // Function to render charts and update stats
+        function renderDashboard(data) {
+            // Update stat cards
+            const totalCases = data.reduce((sum, b) => sum + b.totalCases, 0);
+            const criticalAreas = data.filter(b => b.severity === 'critical').length;
+            const atRiskAreas = data.filter(b => b.severity === 'at-risk').length;
+            const normalAreas = data.filter(b => b.severity === 'normal').length;
+
+            // Only update the total if the filter is 'all' or it is the first render
+            if (currentFilter === 'all') {
+                document.getElementById('totalCases').textContent = totalCases;
+            }
+            document.getElementById('criticalAreas').textContent = criticalAreas;
+            document.getElementById('atRiskAreas').textContent = atRiskAreas;
+            document.getElementById('normalAreas').textContent = normalAreas;
+
+
+            const labels = data.map(b => b.name);
+            const stuntingData = data.map(b => b.stunting);
+            const wastingData = data.map(b => b.wasting);
+            const underweightData = data.map(b => b.underweight);
+            const overweightData = data.map(b => b.overweight);
+
+            // Dynamically set canvas height for better visualization of many bars
+            const malnutritionCanvas = document.getElementById('nutritionBarChart');
+            malnutritionCanvas.style.height = (labels.length * 15 + 100) + 'px';
+
+            // Chart 1: Malnutrition Cases (Stacked Horizontal Bar Chart)
+            if (nutritionChart) nutritionChart.destroy();
+            const malnutritionCtx = malnutritionCanvas.getContext('2d');
+            nutritionChart = new Chart(malnutritionCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Stunting',
+                            data: stuntingData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)', // Red
+                            borderRadius: 10
+                        },
+                        {
+                            label: 'Wasting',
+                            data: wastingData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                            borderRadius: 10
+                        },
+                        {
+                            label: 'Underweight',
+                            data: underweightData,
+                            backgroundColor: 'rgba(251, 191, 36, 0.8)', // Yellow
+                            borderRadius: 10
+                        },
+                        {
+                            label: 'Overweight',
+                            data: overweightData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                            borderRadius: 10
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y', // This makes the chart horizontal
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Cases'
+                            },
+                            beginAtZero: true
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Barangay'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Severity Status (Bar Chart)
+            const severityData = {
+                normal: data.filter(b => b.severity === 'normal').length,
+                atRisk: data.filter(b => b.severity === 'at-risk').length,
+                critical: data.filter(b => b.severity === 'critical').length,
+            };
+            const severityLabels = Object.keys(severityData);
+            const severityCounts = Object.values(severityData);
+
+            if (severityChart) severityChart.destroy();
+            const severityCtx = document.getElementById('statusBarChart').getContext('2d');
+            severityChart = new Chart(severityCtx, {
+                type: 'bar',
+                data: {
+                    labels: severityLabels,
+                    datasets: [{
+                        label: 'Number of Barangays',
+                        data: severityCounts,
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)', // Green for normal
+                            'rgba(251, 191, 36, 0.8)', // Yellow for at-risk
+                            'rgba(239, 68, 68, 0.8)' // Red for critical
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(251, 191, 36)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Severity Level'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Count of Barangays'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            allData = generateMockData();
+            renderDashboard(allData);
+
+            // Handle filter dropdown toggle
+            const filterButton = document.getElementById('filterButton');
+            const filterDropdown = document.getElementById('filterDropdown');
+            filterButton.addEventListener('click', () => {
+                filterDropdown.classList.toggle('show');
+            });
+
+            // Handle filter selection
+            filterDropdown.addEventListener('click', (e) => {
+                const selectedDiv = e.target.closest('div');
+                if (selectedDiv && selectedDiv.dataset.value) {
+                    const selectedFilter = selectedDiv.dataset.value;
+                    currentFilter = selectedFilter;
+                    document.getElementById('filterLabel').textContent = selectedDiv.textContent;
+                    filterDropdown.classList.remove('show');
+
+                    let filteredData = allData;
+                    if (selectedFilter !== 'all') {
+                        filteredData = allData.filter(b => b.severity === selectedFilter);
+                    }
+                    renderDashboard(filteredData);
+                }
+            });
+
+            // Placeholder for export functionality
+            document.getElementById('exportButton').addEventListener('click', () => {
+                // In a real application, you would generate and download a report here
+                console.log('Exporting report...');
+                // Example: window.print() or generate a CSV/PDF
+            });
+
+            // Hide dropdown when clicking outside
+            window.addEventListener('click', (e) => {
+                if (!filterButton.contains(e.target) && !filterDropdown.contains(e.target)) {
+                    filterDropdown.classList.remove('show');
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>

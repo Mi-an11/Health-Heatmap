@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Malnutrition Dashboard - Barangay Management</title>
+    <!-- Use the Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-muted/40;
+            /* Apply a light background similar to shadcn */
+        }
+
+        /* Custom styles for progress bar background */
+        .progress-background {
+            @apply h-2 w-full rounded-full bg-primary/20;
+        }
+
+        .progress-foreground {
+            @apply h-full rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-card border-r border-border flex flex-col h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">LGU Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="adminDashboard.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a href="barangayManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building-2 w-5 h-5 mr-3">
+                    <path d="M6 22V7H4v15c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M10 22V3h-2v19c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M14 22V9h-2v13c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M18 22V11h-2v11c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                </svg>
+                <span class="flex-1 text-left">Barangay Management</span>
+            </a>
+            <a href="analytics.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-bar-chart-3 w-5 h-5 mr-3">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span class="flex-1 text-left">Analytics</span>
+            </a>
+            <a href="userManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-users w-5 h-5 mr-3">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="flex-1 text-left">User Management</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Sibalom LGU</p>
+                    <p class="text-xs text-muted-foreground">Administrator</p>
+                </div>
+            </div>
+            <a href="../Landing Page/landingPage.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-y-auto">
+        <!-- Main Dashboard View -->
+        <div id="main-dashboard-view" class="p-6 space-y-6">
+            <div class="flex items-center justify-between rounded-lg">
+                <div>
+                    <h1 class="text-2xl font-semibold text-foreground">Barangay Management</h1>
+                    <p class="text-sm text-muted-foreground">Monitor and manage all 76 barangays</p>
+                </div>
+                <!-- Search and sort controls (non-functional) -->
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <input type="text" placeholder="Search barangays..."
+                            class="flex h-9 w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10">
+                    </div>
+                    <div class="relative w-32">
+                        <select
+                            class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 appearance-none pr-8">
+                            <option value="name">Sort by Name</option>
+                            <option value="children">Sort by Total Children</option>
+                            <option value="critical">Sort by Critical Cases</option>
+                        </select>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-chevron-down h-4 w-4 shrink-0 opacity-50 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary cards (hardcoded data) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Barangays</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-map-pin h-4 w-4 text-muted-foreground">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold">76</div>
+                        <p class="text-xs text-muted-foreground">Complete coverage</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Children</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-baby h-4 w-4 text-muted-foreground">
+                            <path d="M9 12h.01" />
+                            <path d="M15 12h.01" />
+                            <path d="M10 16.5h4" />
+                            <path d="M18 19H6a3 3 0 0 1-3-3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v9a3 3 0 0 1-3 3Z" />
+                            <path d="M7 21h10" />
+                            <path d="M10 3v4" />
+                            <path d="M14 3v4" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold">0</div>
+                        <p class="text-xs text-muted-foreground">Monitored children</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Health Workers</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-users h-4 w-4 text-muted-foreground">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold">0</div>
+                        <p class="text-xs text-muted-foreground">Active personnel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barangay Cards Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold text-foreground">Barangay Profiles</h2>
+                    <p class="text-sm text-muted-foreground">Showing 3 of 76 barangays</p>
+                </div>
+
+                <!-- Barangay Grid (hardcoded cards) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Example Card 1: Normal Status -->
+                    <div
+                        class="bg-card p-4 rounded-xl border border-border transition-all hover:shadow-lg hover:scale-[1.02] shadow-sm">
+                        <div class="pb-3">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path
+                                            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v9.5Z">
+                                        </path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-foreground">Barangay Alangan</h3>
+                                        <p class="text-muted-foreground text-sm">0 children</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 pt-3 border-t border-border">
+                            <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M18.364 18.364A9 9 0 0 0 5.636 5.636 9 9 0 0 0 18.364 18.364ZM12 7l-5.6 5.6">
+                                    </path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M12 2v2M12 20v2M22 12h-2M4 12H2"></path>
+                                </svg>
+                                <span>Last updated: Oct 20, 2023</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-center text-sm">
+                                <div class="bg-green-100 text-green-700 p-2 rounded-md">
+                                    <div class="font-medium text-inherit">0</div>
+                                    <div class="text-xs">Normal</div>
+                                </div>
+                                <div class="bg-yellow-100 text-yellow-700 p-2 rounded-md">
+                                    <div class="font-medium text-inherit">0</div>
+                                    <div class="text-xs">At Risk</div>
+                                </div>
+                                <div class="bg-red-100 text-red-700 p-2 rounded-md">
+                                    <div class="font-medium text-inherit">0</div>
+                                    <div class="text-xs">Critical</div>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-border">
+                                <button onclick="viewChildren('Barangay Alangan')"
+                                    class="w-full inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                    <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                
+
+
+            </div>
+        </div>
+
+        <!-- Children's List View (initially hidden) -->
+        <div id="children-list-view" class="p-6 space-y-6 hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="showDashboard()"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-chevron-left h-4 w-4">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                        <span class="sr-only">Go back</span>
+                    </button>
+                    <div>
+                        <h1 id="children-view-title" class="text-2xl font-semibold text-foreground">Children in [Barangay Name]</h1>
+                        <p class="text-sm text-muted-foreground">List of all children and their details</p>
+                    </div>
+                </div>
+                <!-- Add New Child Button -->
+                 <button id="add-child-btn"
+                 class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="lucide lucide-plus w-4 h-4 mr-2">
+                     <path d="M12 5v14" />
+                     <path d="M5 12h14" />
+                 </svg>
+                 Add New Child
+             </button>
+            </div>
+
+            <div class="rounded-xl border bg-card text-card-foreground shadow overflow-hidden">
+                <div class="relative w-full overflow-auto">
+                    <table class="w-full text-sm">
+                        <thead class="[&amp;_tr]:border-b">
+                            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Name</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Age</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Gender</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Nutritional Status</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 hidden md:table-cell">Health Worker</th>
+                                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 hidden sm:table-cell">Date Registered</th>
+                                <!-- The `text-right` class on this header ensures the label aligns with the actions below. -->
+                                <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="children-table-body" class="[&amp;_tr:last-child]:border-0">
+                            <!-- Table rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data for children in Barangay Alangan
+        const childrenData = {
+            'Barangay Alangan': [
+                { name: 'John Doe', age: '4 yrs', gender: 'Male', status: 'Normal', healthWorker: 'Jane Smith', date: 'Oct 15, 2023' },
+                { name: 'Maria Santos', age: '2 yrs', gender: 'Female', status: 'At Risk', healthWorker: 'Jane Smith', date: 'Oct 15, 2023' }
+              
+            ]
+        };
+
+        const dashboardView = document.getElementById('main-dashboard-view');
+        const childrenListView = document.getElementById('children-list-view');
+        const childrenTableBody = document.getElementById('children-table-body');
+        const childrenViewTitle = document.getElementById('children-view-title');
+
+        // Function to show the children list and hide the dashboard
+        function viewChildren(barangayName) {
+            dashboardView.classList.add('hidden');
+            childrenListView.classList.remove('hidden');
+            childrenViewTitle.innerText = `Children in ${barangayName}`;
+            populateChildrenTable(barangayName);
+        }
+
+        // Function to populate the table with data
+        function populateChildrenTable(barangayName) {
+            childrenTableBody.innerHTML = '';
+            const children = childrenData[barangayName] || [];
+
+            children.forEach(child => {
+                // Determine status color class based on nutritional status
+                let statusColorClass;
+                switch (child.status) {
+                    case 'Normal':
+                        statusColorClass = 'text-green-700 bg-green-100';
+                        break;
+                    case 'At Risk':
+                        statusColorClass = 'text-yellow-700 bg-yellow-100';
+                        break;
+                    case 'Critical':
+                        statusColorClass = 'text-red-700 bg-red-100';
+                        break;
+                    default:
+                        statusColorClass = 'text-gray-700 bg-gray-100';
+                        break;
+                }
+
+                const row = document.createElement('tr');
+                row.className = 'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted';
+                row.innerHTML = `
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 font-medium">${child.name}</td>
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${child.age}</td>
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${child.gender}</td>
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorClass}">
+                            ${child.status}
+                        </span>
+                    </td>
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 hidden md:table-cell">${child.healthWorker}</td>
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 hidden sm:table-cell">${child.date}</td>
+                    <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-right">
+                        <div class="flex space-x-2 justify-end">
+                            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <span class="sr-only">View</span>
+                            </button>
+                            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                    <path d="M12 20h9"></path>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                                <span class="sr-only">Edit</span>
+                            </button>
+                            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive hover:text-destructive-foreground h-8 w-8 p-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                </svg>
+                                <span class="sr-only">Delete</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                childrenTableBody.appendChild(row);
+            });
+        }
+
+        // Function to show the dashboard and hide the children list
+        function showDashboard() {
+            dashboardView.classList.remove('hidden');
+            childrenListView.classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

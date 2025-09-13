@@ -1,0 +1,306 @@
+{
+    "Alangan": {
+      "lat": 10.8036,
+      "lon": 121.9961
+    },
+    "Bari": {
+      "lat": 10.7974,
+      "lon": 122.0068
+    },
+    "Biga-a": {
+      "lat": 10.8148,
+      "lon": 121.9992
+    },
+    "Bongbongan I": {
+      "lat": 10.8424,
+      "lon": 122.0278
+    },
+    "Bongbongan II": {
+      "lat": 10.8228,
+      "lon": 122.0306
+    },
+    "Bongsod": {
+      "lat": 10.7984,
+      "lon": 121.9901
+    },
+    "Bontol": {
+      "lat": 10.7572,
+      "lon": 122.0925
+    },
+    "Bugnay": {
+      "lat": 10.7935,
+      "lon": 122.094
+    },
+    "Bulalacao": {
+      "lat": 10.7413,
+      "lon": 122.1042
+    },
+    "Cabanbanan": {
+      "lat": 10.7987,
+      "lon": 122.1279
+    },
+    "Cabariuan": {
+      "lat": 10.8296,
+      "lon": 122.003
+    },
+    "Cabladan": {
+      "lat": 10.8012,
+      "lon": 122.1659
+    },
+    "Cadoldolan": {
+      "lat": 10.8256,
+      "lon": 122.0135
+    },
+    "Calog": {
+      "lat": 10.7434,
+      "lon": 122.0469
+    },
+    "Calo-oy": {
+      "lat": 10.7361,
+      "lon": 122.0915
+    },
+    "Catmon": {
+      "lat": 10.7801,
+      "lon": 122.0306
+    },
+    "Catungan I": {
+      "lat": 10.7672,
+      "lon": 122.015
+    },
+    "Catungan II": {
+      "lat": 10.7631,
+      "lon": 122.0042
+    },
+    "Catungan III": {
+      "lat": 10.7662,
+      "lon": 121.9966
+    },
+    "Catungan IV": {
+      "lat": 10.7658,
+      "lon": 121.9848
+    },
+    "Cubay-Napultan": {
+      "lat": 10.7879,
+      "lon": 121.9929
+    },
+    "Cubay-Sermon": {
+      "lat": 10.7838,
+      "lon": 122.0259
+    },
+    "District I": {
+      "lat": 10.7925,
+      "lon": 122.0064
+    },
+    "District II": {
+      "lat": 10.7927,
+      "lon": 122.0169
+    },
+    "District III": {
+      "lat": 10.7797,
+      "lon": 122.006
+    },
+    "District IV": {
+      "lat": 10.7931,
+      "lon": 122.0252
+    },
+    "Ega\u00f1a": {
+      "lat": 10.7476,
+      "lon": 122.008
+    },
+    "Esperanza I": {
+      "lat": 10.8044,
+      "lon": 122.0085
+    },
+    "Esperanza II": {
+      "lat": 10.8078,
+      "lon": 122.0172
+    },
+    "Esperanza III": {
+      "lat": 10.81,
+      "lon": 122.0123
+    },
+    "Igcococ": {
+      "lat": 10.7293,
+      "lon": 122.0634
+    },
+    "Igdagmay": {
+      "lat": 10.8306,
+      "lon": 122.0235
+    },
+    "Igdalaquit": {
+      "lat": 10.7865,
+      "lon": 122.0597
+    },
+    "Iglanot": {
+      "lat": 10.7878,
+      "lon": 122.0446
+    },
+    "Igpanolong": {
+      "lat": 10.7731,
+      "lon": 122.0933
+    },
+    "Igparas": {
+      "lat": 10.7094,
+      "lon": 122.0774
+    },
+    "Igsuming": {
+      "lat": 10.8018,
+      "lon": 122.0842
+    },
+    "Ilabas": {
+      "lat": 10.7889,
+      "lon": 121.9837
+    },
+    "Imparayan": {
+      "lat": 10.7889,
+      "lon": 122.1087
+    },
+    "Inabasan": {
+      "lat": 10.7321,
+      "lon": 122.0234
+    },
+    "Indag-an": {
+      "lat": 10.771,
+      "lon": 122.082
+    },
+    "Initan": {
+      "lat": 10.7446,
+      "lon": 122.0624
+    },
+    "Insarayan": {
+      "lat": 10.7535,
+      "lon": 122.0241
+    },
+    "Lacaron": {
+      "lat": 10.8277,
+      "lon": 121.9916
+    },
+    "Lagdo": {
+      "lat": 10.8435,
+      "lon": 122.0132
+    },
+    "Lambayagan": {
+      "lat": 10.7285,
+      "lon": 122.0792
+    },
+    "Luna": {
+      "lat": 10.7673,
+      "lon": 122.1069
+    },
+    "Luyang": {
+      "lat": 10.738,
+      "lon": 122.0787
+    },
+    "Maasin": {
+      "lat": 10.7994,
+      "lon": 122.0673
+    },
+    "Mabini": {
+      "lat": 10.7581,
+      "lon": 122.0469
+    },
+    "Millamena": {
+      "lat": 10.7534,
+      "lon": 122.0681
+    },
+    "Mojon": {
+      "lat": 10.8301,
+      "lon": 121.9841
+    },
+    "Nagdayao": {
+      "lat": 10.7742,
+      "lon": 122.046
+    },
+    "Nazareth": {
+      "lat": 10.7705,
+      "lon": 122.0293
+    },
+    "Odiong": {
+      "lat": 10.7771,
+      "lon": 121.9838
+    },
+    "Olaga": {
+      "lat": 10.8153,
+      "lon": 121.9924
+    },
+    "Pangpang": {
+      "lat": 10.81,
+      "lon": 121.9854
+    },
+    "Panlagangan": {
+      "lat": 10.7684,
+      "lon": 122.058
+    },
+    "Pantao": {
+      "lat": 10.8025,
+      "lon": 121.9777
+    },
+    "Pasong": {
+      "lat": 10.782,
+      "lon": 122.0359
+    },
+    "Pis-anan": {
+      "lat": 10.7668,
+      "lon": 122.0705
+    },
+    "Rombang": {
+      "lat": 10.8174,
+      "lon": 121.9845
+    },
+    "Salvacion": {
+      "lat": 10.7832,
+      "lon": 122.0721
+    },
+    "San Juan": {
+      "lat": 10.7978,
+      "lon": 122.0486
+    },
+    "Sido": {
+      "lat": 10.8102,
+      "lon": 122.0454
+    },
+    "Solong": {
+      "lat": 10.8022,
+      "lon": 122.027
+    },
+    "Tabongtabong": {
+      "lat": 10.7093,
+      "lon": 122.0643
+    },
+    "Tigbalua I": {
+      "lat": 10.7616,
+      "lon": 122.0188
+    },
+    "Tigbalua II": {
+      "lat": 10.7596,
+      "lon": 122.0276
+    },
+    "Tig-Ohot": {
+      "lat": 10.723,
+      "lon": 122.0449
+    },
+    "Tordesillas": {
+      "lat": 10.7503,
+      "lon": 122.125
+    },
+    "Tulatula": {
+      "lat": 10.7463,
+      "lon": 122.0864
+    },
+    "Valentin Grasparil": {
+      "lat": 10.7169,
+      "lon": 122.0977
+    },
+    "Villafont": {
+      "lat": 10.7896,
+      "lon": 122.0808
+    },
+    "Villahermosa": {
+      "lat": 10.7925,
+      "lon": 122.0385
+    },
+    "Villar": {
+      "lat": 10.8155,
+      "lon": 122.0071
+    }
+  }

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Malnutrition Dashboard - Barangay Management</title>
+    <!-- Use the Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind CSS configuration to mimic shadcn/ui colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96.1%)",
+                            foreground: "hsl(222.2 47.4% 11.2%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-muted/40;
+            /* Apply a light background similar to shadcn */
+        }
+
+        /* Custom styles for progress bar background */
+        .progress-background {
+            @apply h-2 w-full rounded-full bg-primary/20;
+        }
+
+        .progress-foreground {
+            @apply h-full rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <div class="w-64 bg-card border-r border-border flex flex-col h-full">
+        <div class="p-6 border-b border-border">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-shield w-6 h-6 text-primary-foreground">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-foreground">LGU Monitor</h2>
+                    <p class="text-sm text-muted-foreground">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="adminDashboard.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-layout-dashboard w-5 h-5 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" />
+                </svg>
+                <span class="flex-1 text-left">Dashboard</span>
+            </a>
+            <a
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building-2 w-5 h-5 mr-3">
+                    <path d="M6 22V7H4v15c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M10 22V3h-2v19c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M14 22V9h-2v13c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                    <path d="M18 22V11h-2v11c0 .6.4 1 1 1h1c.6 0 1-.4 1-1Z" />
+                </svg>
+                <span class="flex-1 text-left">Barangay Management</span>
+            </a>
+            <a
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-bar-chart-3 w-5 h-5 mr-3">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span class="flex-1 text-left">Analytics</span>
+            </a>
+            <a href="userManagement.html"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-12 px-4 py-2 w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-users w-5 h-5 mr-3">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="flex-1 text-left">User Management</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-map-pin w-4 h-4 text-primary-foreground">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-foreground">Sibalom LGU</p>
+                    <p class="text-xs text-muted-foreground">Administrator</p>
+                </div>
+            </div>
+            <button
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-ghost hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full mt-2 justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-log-out w-4 h-4 mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-y-auto">
+        <div id="main-dashboard-view" class="p-6 space-y-6">
+            <div class="flex items-center justify-between rounded-lg">
+                <div>
+                    <h1 class="text-3xl font-semibold text-foreground">Barangay Management</h1>
+                    <p class="text-sm text-muted-foreground">Monitor and manage all 76 barangays</p>
+                </div>
+                <!-- Search and sort controls -->
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-search w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Search barangays..."
+                            class="flex h-9 w-48 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10">
+                    </div>
+                    <div class="relative w-32">
+                        <select id="sortSelect"
+                            class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 appearance-none pr-8">
+                            <option value="name">Sort by Name</option>
+                            <option value="children">Sort by Total Children</option>
+                            <option value="critical">Sort by Critical Cases</option>
+                        </select>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-chevron-down h-4 w-4 shrink-0 opacity-50 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Barangays</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-map-pin h-4 w-4 text-muted-foreground">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold">76</div>
+                        <p class="text-xs text-muted-foreground">Complete coverage</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Total Children</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-baby h-4 w-4 text-muted-foreground">
+                            <path d="M9 12h.01" />
+                            <path d="M15 12h.01" />
+                            <path d="M10 16.5h4" />
+                            <path d="M18 19H6a3 3 0 0 1-3-3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v9a3 3 0 0 1-3 3Z" />
+                            <path d="M7 21h10" />
+                            <path d="M10 3v4" />
+                            <path d="M14 3v4" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold" id="totalChildrenCount">0</div>
+                        <p class="text-xs text-muted-foreground">Monitored children</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border bg-card text-card-foreground shadow">
+                    <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+                        <h3 class="whitespace-nowrap tracking-tight text-sm font-medium">Health Workers</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-users h-4 w-4 text-muted-foreground">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="text-2xl font-bold" id="healthWorkersCount">0</div>
+                        <p class="text-xs text-muted-foreground">Active personnel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barangay Cards Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold text-foreground">Barangay Profiles</h2>
+                    <p id="resultsSummary" class="text-sm text-muted-foreground"></p>
+                </div>
+
+                <!-- Barangay Grid -->
+                <div id="barangayGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Barangay cards will be rendered here by JavaScript -->
+                </div>
+
+                <!-- No results message -->
+                <div id="noResults" class="hidden">
+                    <div class="bg-card p-6 rounded-xl shadow-sm border border-border text-center">
+                        <svg class="h-12 w-12 mx-auto text-muted-foreground mb-4" xmlns="http://www.w3.org/2000/svg"
+                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V5H6.5A2.5 2.5 0 0 0 4 7.5v12Z"></path>
+                            <path d="M16 17v-4"></path>
+                        </svg>
+                        <p class="text-muted-foreground">No barangays found matching your search criteria.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data and helper functions from the original HTML
+        const barangayNames = [
+            'Alangan', 'Valentin Grasparil (Bad-as)', 'Bari', 'Biga-a', 'Bongbongan I', 'Bongbongan II',
+            'Bongsod', 'Bontol', 'Bugnay', 'Bulalacao', 'Cabanbanan', 'Cabariuan', 'Cabladan',
+            'Cadoldolan', 'Calo-oy', 'Calog', 'Catmon', 'Catungan I', 'Catungan II', 'Catungan III',
+            'Catungan IV', 'Cubay-Sermon', 'Egaña', 'Esperanza I', 'Esperanza II', 'Esperanza III',
+            'Igcococ', 'Igdalaquit', 'Igdagmay', 'Iglanot', 'Igpanolong', 'Igparas', 'Igsuming',
+            'Ilabas', 'Imparayan', 'Inabasan', 'Indag-an', 'Initan', 'Insarayan', 'Lacaron',
+            'Lagdo', 'Lambayagan', 'Luna', 'Luyang', 'Maasin', 'Mabini', 'Millamena', 'Mojon',
+            'Nagdayao', 'Cubay-Napultan', 'Nazareth', 'Odiong', 'Olaga', 'Pangpang', 'Panlagangan',
+            'Pantao', 'Pasong', 'Pis-Anan', 'District I (Pob.)', 'District II (Pob.)', 'District III (Pob.)',
+            'District IV (Pob.)', 'Rombang', 'Salvacion', 'San Juan', 'Sido', 'Solong', 'Tabongtabong',
+            'Tig-Ohot', 'Tigbalua I', 'Tordesillas', 'Tulatula', 'Villafont', 'Villahermosa', 'Villar',
+            'Tigbalua II'
+        ];
+
+        const firstNames = ['Maria', 'Jose', 'Ana', 'Juan', 'Luz', 'Pedro', 'Rosa', 'Miguel', 'Carmen', 'Luis', 'Elena', 'Carlos', 'Sofia', 'Ramon', 'Isabel', 'Antonio', 'Esperanza', 'Ricardo', 'Lourdes', 'Fernando'];
+        const lastNames = ['Santos', 'Reyes', 'Cruz', 'Garcia', 'Rodriguez', 'Fernandez', 'Lopez', 'Martinez', 'Gonzalez', 'Perez', 'Sanchez', 'Ramirez', 'Torres', 'Flores', 'Rivera', 'Morales', 'Jimenez', 'Herrera', 'Gutierrez', 'Ruiz'];
+        const healthWorkers = ['Nurse Maria Santos', 'Dr. Juan Reyes', 'Nurse Ana Cruz', 'Nurse Pedro Garcia', 'Dr. Rosa Rodriguez', 'Nurse Miguel Lopez', 'Nurse Elena Martinez', 'Dr. Carlos Gonzalez'];
+
+        function generateBarangayData() {
+            return barangayNames.map((barangayName) => {
+                const totalChildren = Math.floor(Math.random() * 25) + 5;
+                const children = [];
+
+                for (let i = 0; i < totalChildren; i++) {
+                    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                    const age = Math.floor(Math.random() * 60) + 6;
+                    const birthDate = new Date();
+                    birthDate.setMonth(birthDate.getMonth() - age);
+
+                    const statusRandom = Math.random();
+                    const nutritionalStatus = statusRandom < 0.7 ? 'normal' : statusRandom < 0.9 ? 'at-risk' : 'critical';
+
+                    const lastVisitDays = Math.floor(Math.random() * 90);
+                    const lastVisit = new Date();
+                    lastVisit.setDate(lastVisit.getDate() - lastVisitDays);
+
+                    children.push({
+                        id: `${barangayName}_${i + 1}`,
+                        firstName,
+                        lastName,
+                        dateOfBirth: birthDate.toISOString().split('T')[0],
+                        gender: Math.random() < 0.5 ? 'male' : 'female',
+                        nutritionalStatus,
+                        lastVisit: lastVisit.toISOString().split('T')[0],
+                        healthWorker: healthWorkers[Math.floor(Math.random() * healthWorkers.length)],
+                        totalVisits: Math.floor(Math.random() * 8) + 1
+                    });
+                }
+
+                const normalCount = children.filter(c => c.nutritionalStatus === 'normal').length;
+                const atRiskCount = children.filter(c => c.nutritionalStatus === 'at-risk').length;
+                const criticalCount = children.filter(c => c.nutritionalStatus === 'critical').length;
+
+                const lastUpdatedDays = Math.floor(Math.random() * 7);
+                const lastUpdated = new Date();
+                lastUpdated.setDate(lastUpdated.getDate() - lastUpdatedDays);
+
+                return {
+                    name: barangayName,
+                    totalChildren,
+                    normalCount,
+                    atRiskCount,
+                    criticalCount,
+                    lastUpdated: lastUpdated.toISOString().split('T')[0],
+                    children: children.sort((a, b) => a.lastName.localeCompare(b.lastName))
+                };
+            });
+        }
+
+        const mockBarangayData = generateBarangayData();
+        const totalChildrenCount = mockBarangayData.reduce((sum, b) => sum + b.totalChildren, 0);
+        const uniqueHealthWorkers = new Set(mockBarangayData.flatMap(b => b.children.map(c => c.healthWorker)));
+
+        // Update summary cards
+        document.getElementById('totalChildrenCount').textContent = totalChildrenCount;
+        document.getElementById('healthWorkersCount').textContent = uniqueHealthWorkers.size;
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'normal':
+                    return 'bg-green-100 text-green-700';
+                case 'at-risk':
+                    return 'bg-yellow-100 text-yellow-700';
+                case 'critical':
+                    return 'bg-red-100 text-red-700';
+                default:
+                    return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const barangayGrid = document.getElementById('barangayGrid');
+        const resultsSummary = document.getElementById('resultsSummary');
+        const noResults = document.getElementById('noResults');
+
+        // State variables
+        let searchTerm = '';
+        let sortBy = 'name';
+
+        // Main render function
+        function render() {
+            // Filter data based on search term
+            const filteredBarangays = mockBarangayData.filter(barangay =>
+                barangay.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            // Sort data based on selected option
+            filteredBarangays.sort((a, b) => {
+                switch (sortBy) {
+                    case 'children':
+                        return b.totalChildren - a.totalChildren;
+                    case 'critical':
+                        return b.criticalCount - a.criticalCount;
+                    case 'name':
+                    default:
+                        return a.name.localeCompare(b.name);
+                }
+            });
+
+            // Update summary text
+            resultsSummary.textContent = `Showing ${filteredBarangays.length} of ${mockBarangayData.length} barangays`;
+
+            // Clear the grid
+            barangayGrid.innerHTML = '';
+
+            // Show or hide the "no results" message
+            if (filteredBarangays.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            // Generate and append new cards
+            filteredBarangays.forEach(barangay => {
+                const card = document.createElement('div');
+                card.className = "bg-card p-4 rounded-xl border border-border transition-all hover:shadow-lg hover:scale-[1.02] shadow-sm";
+
+                card.innerHTML = `
+                    <div class="pb-3">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-2">
+                                <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v9.5Z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-foreground">Barangay ${barangay.name}</h3>
+                                    <p class="text-muted-foreground text-sm">${barangay.totalChildren} children</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-3 pt-3 border-t border-border">
+                        <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18.364 18.364A9 9 0 0 0 5.636 5.636 9 9 0 0 0 18.364 18.364ZM12 7l-5.6 5.6"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 2v2M12 20v2M22 12h-2M4 12H2"></path>
+                            </svg>
+                            <span>Last updated: ${formatDate(barangay.lastUpdated)}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center text-sm">
+                            <div class="${getStatusColor('normal')} p-2 rounded-md">
+                                <div class="font-medium text-inherit">${barangay.normalCount}</div>
+                                <div class="text-xs">Normal</div>
+                            </div>
+                            <div class="${getStatusColor('at-risk')} p-2 rounded-md">
+                                <div class="font-medium text-inherit">${barangay.atRiskCount}</div>
+                                <div class="text-xs">At Risk</div>
+                            </div>
+                            <div class="${getStatusColor('critical')} p-2 rounded-md">
+                                <div class="font-medium text-inherit">${barangay.criticalCount}</div>
+                                <div class="text-xs">Critical</div>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-border">
+                            <button onclick="console.log('Viewing children for Barangay ' + '${barangay.name}');" class="w-full inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                View ${barangay.totalChildren} Children
+                            </button>
+                        </div>
+                    </div>
+                `;
+                barangayGrid.appendChild(card);
+            });
+        }
+
+        // Add event listeners to the controls
+        searchInput.addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            render();
+        });
+
+        sortSelect.addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            render();
+        });
+
+        // Initial render
+        document.addEventListener('DOMContentLoaded', render);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      transition: all 0.5s ease;
+    }
+
+    /* Dynamic background themes - Updated to green */
+    .admin-theme {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #a7f3d0 100%);
+    }
+
+    .health-worker-theme {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+    }
+
+    /* Floating label */
+    .floating-input {
+      position: relative;
+    }
+
+    .floating-input input {
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(12px);
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      outline: none;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .floating-input input:focus {
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .admin-theme .floating-input input:focus {
+      border-color: #16a34a;
+      box-shadow: 0 0 12px rgba(22, 163, 74, 0.3);
+    }
+
+    .health-worker-theme .floating-input input:focus {
+      border-color: #059669;
+      box-shadow: 0 0 12px rgba(5, 150, 105, 0.3);
+    }
+
+    .floating-input label {
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      color: #6b7280;
+      pointer-events: none;
+      transition: 0.25s ease;
+    }
+
+    .floating-input input:focus+label,
+    .floating-input input:not(:placeholder-shown)+label {
+      top: -0.6rem;
+      left: 0.8rem;
+      font-size: 0.75rem;
+      background: white;
+      padding: 0 0.25rem;
+      border-radius: 0.5rem;
+    }
+
+    .admin-theme .floating-input input:focus+label,
+    .admin-theme .floating-input input:not(:placeholder-shown)+label {
+      color: #15803d;
+    }
+
+    .health-worker-theme .floating-input input:focus+label,
+    .health-worker-theme .floating-input input:not(:placeholder-shown)+label {
+      color: #047857;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    /* Dynamic left panel themes - Updated to green gradients */
+    .left-panel-admin {
+      background: linear-gradient(135deg, #16a34a 0%, #059669 50%, #047857 100%);
+    }
+
+    .left-panel-health-worker {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+    }
+
+    /* Dynamic login card themes - Updated to green */
+    .login-card-admin {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(134, 239, 172, 0.4);
+    }
+
+    .login-card-health-worker {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(110, 231, 183, 0.4);
+    }
+
+    /* Dynamic card background overlay - Updated to green */
+    .card-overlay-admin {
+      background: linear-gradient(135deg, rgba(134, 239, 172, 0.4) 0%, rgba(110, 231, 183, 0.4) 50%, rgba(52, 211, 153, 0.4) 100%);
+    }
+
+    .card-overlay-health-worker {
+      background: linear-gradient(135deg, rgba(110, 231, 183, 0.4) 0%, rgba(52, 211, 153, 0.4) 50%, rgba(16, 185, 129, 0.4) 100%);
+    }
+
+    /* Dynamic text gradients - Updated to green */
+    .title-gradient-admin {
+      background: linear-gradient(135deg, #16a34a, #059669);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .title-gradient-health-worker {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Smooth transitions for all dynamic elements */
+    .left-panel, .login-card, .card-overlay, .welcome-title {
+      transition: all 0.5s ease;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex admin-theme">
+
+  <!-- Left Branding Panel -->
+  <div id="leftPanel"
+    class="hidden md:flex md:w-1/2 left-panel left-panel-admin text-white flex-col justify-center items-center p-12 relative">
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    <div class="relative text-center z-10 max-w-lg ">
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-xl mb-6">
+        Smart Heatmap-Based <br>
+        <span class="text-green-300">Malnutrition Monitoring</span> <br>
+        System
+      </h1>
+      <div class="mt-4 mb-6 w-20 h-1 mx-auto bg-white/70 rounded-full shadow-lg"></div>
+      <p class="text-base md:text-lg text-white/90 leading-relaxed px-4">
+        Empowering communities with <span class="font-semibold text-green-200">real-time data</span>
+        and <span class="font-semibold text-emerald-200">actionable insights</span>
+        for a healthier tomorrow.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Login Panel -->
+  <div class="w-full md:w-1/2 flex items-center justify-center p-8">
+    <div id="loginCard"
+      class="w-full max-w-md login-card login-card-admin rounded-3xl shadow-2xl p-10 hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden">
+      <div id="cardOverlay"
+        class="absolute inset-0 card-overlay card-overlay-admin opacity-60 blur-3xl -z-10">
+      </div>
+
+      <!-- Header -->
+      <h1 id="welcomeTitle"
+        class="text-4xl font-extrabold text-center welcome-title title-gradient-admin drop-shadow-lg mb-3">
+        Welcome Back
+      </h1>
+      <p class="text-center text-gray-700 mb-10">Sign in to continue</p>
+
+      <!-- Role Switch -->
+      <div class="flex justify-center mb-10">
+        <div class="bg-white/50 backdrop-blur-md rounded-full p-1 flex space-x-2 shadow-inner">
+          <button type="button" id="adminBtn"
+            class="flex-1 px-6 py-2 rounded-full text-sm font-medium transition bg-green-600 text-white shadow-md hover:scale-105">
+            Admin
+          </button>
+          <button type="button" id="workerBtn"
+            class="flex-1 px-6 py-2 rounded-full text-sm font-medium transition text-gray-700 hover:bg-white/70 hover:scale-105">
+            Health Worker
+          </button>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-6">
+        <div class="floating-input">
+          <input id="email" name="email" type="email" placeholder=" " required>
+          <label for="email">Email</label>
+        </div>
+
+        <div class="floating-input">
+          <input id="password" name="password" type="password" placeholder=" " required>
+          <label for="password">Password</label>
+        </div>
+
+        <div id="errorMessage" class="error-message">
+          Unable to redirect. Please check if the target pages exist.
+        </div>
+
+        <input type="hidden" id="role" name="role" value="admin">
+
+        <button type="submit" id="submitBtn"
+          class="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:scale-105 hover:opacity-95 transition flex justify-center items-center space-x-2">
+          <span id="submitText">Sign In</span>
+          <div class="loading-spinner" id="loadingSpinner"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" id="submitArrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-gray-700 mt-8">
+        Forgot your password? <a href="#" id="resetLink" class="text-green-600 font-semibold hover:underline">Reset here</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Role Switching + Redirect -->
+  <script>
+    const adminBtn = document.getElementById("adminBtn");
+    const workerBtn = document.getElementById("workerBtn");
+    const roleInput = document.getElementById("role");
+    const loginForm = document.getElementById("loginForm");
+    const signInBtn = loginForm.querySelector("button[type='submit']");
+    const submitText = document.getElementById("submitText");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const submitArrow = document.getElementById("submitArrow");
+    const errorMessage = document.getElementById("errorMessage");
+    
+    // Theme elements
+    const body = document.body;
+    const leftPanel = document.getElementById("leftPanel");
+    const loginCard = document.getElementById("loginCard");
+    const cardOverlay = document.getElementById("cardOverlay");
+    const welcomeTitle = document.getElementById("welcomeTitle");
+    const resetLink = document.getElementById("resetLink");
+
+    function setAdminTheme() {
+      // Body background
+      body.className = "min-h-screen flex admin-theme";
+      
+      // Left panel
+      leftPanel.className = "hidden md:flex md:w-1/2 left-panel left-panel-admin text-white flex-col justify-center items-center p-12 relative";
+      
+      // Login card
+      loginCard.className = "w-full max-w-md login-card login-card-admin rounded-3xl shadow-2xl p-10 hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden";
+      
+      // Card overlay
+      cardOverlay.className = "absolute inset-0 card-overlay card-overlay-admin opacity-60 blur-3xl -z-10";
+      
+      // Welcome title
+      welcomeTitle.className = "text-4xl font-extrabold text-center welcome-title title-gradient-admin drop-shadow-lg mb-3";
+      
+      // Button styling
+      adminBtn.className = "flex-1 px-6 py-2 rounded-full text-sm font-medium transition bg-green-600 text-white shadow-md hover:scale-105";
+      workerBtn.className = "flex-1 px-6 py-2 rounded-full text-sm font-medium transition text-gray-700 hover:bg-white/70 hover:scale-105";
+      
+      // Submit button
+      signInBtn.className = "w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:scale-105 hover:opacity-95 transition flex justify-center items-center space-x-2";
+      
+      // Reset link
+      resetLink.className = "text-green-600 font-semibold hover:underline";
+    }
+
+    function setHealthWorkerTheme() {
+      // Body background
+      body.className = "min-h-screen flex health-worker-theme";
+      
+      // Left panel
+      leftPanel.className = "hidden md:flex md:w-1/2 left-panel left-panel-health-worker text-white flex-col justify-center items-center p-12 relative";
+      
+      // Login card
+      loginCard.className = "w-full max-w-md login-card login-card-health-worker rounded-3xl shadow-2xl p-10 hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden";
+      
+      // Card overlay
+      cardOverlay.className = "absolute inset-0 card-overlay card-overlay-health-worker opacity-60 blur-3xl -z-10";
+      
+      // Welcome title
+      welcomeTitle.className = "text-4xl font-extrabold text-center welcome-title title-gradient-health-worker drop-shadow-lg mb-3";
+      
+      // Button styling
+      workerBtn.className = "flex-1 px-6 py-2 rounded-full text-sm font-medium transition bg-lime-500 text-white shadow-md hover:scale-105";
+      adminBtn.className = "flex-1 px-6 py-2 rounded-full text-sm font-medium transition text-gray-700 hover:bg-white/70 hover:scale-105";
+      
+      // Submit button
+      signInBtn.className = "w-full py-3 bg-gradient-to-r from-lime-500 to-green-500 text-white rounded-2xl font-semibold shadow-lg hover:scale-105 hover:opacity-95 transition flex justify-center items-center space-x-2";
+      
+      // Reset link
+      resetLink.className = "text-lime-600 font-semibold hover:underline";
+    }
+
+    // Role switching functionality
+    adminBtn.addEventListener("click", () => {
+      roleInput.value = "admin";
+      setAdminTheme();
+    });
+
+    workerBtn.addEventListener("click", () => {
+      roleInput.value = "health_worker";
+      setHealthWorkerTheme();
+    });
+
+    // Handle form submission with better error handling and feedback
+    loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      
+      // Show loading state
+      submitText.textContent = "Signing in...";
+      loadingSpinner.style.display = "block";
+      submitArrow.style.display = "none";
+      errorMessage.style.display = "none";
+      
+      const role = roleInput.value;
+      let redirectUrl = "";
+
+      // Define redirect URLs - UPDATE THESE PATHS TO MATCH YOUR FILE STRUCTURE
+      if (role === "admin") {
+        redirectUrl = "../Admin/adminDashboard.html"; // Original path
+        // Alternative paths you can try:
+        // redirectUrl = "./Admin/adminDashboard.html";
+        // redirectUrl = "Admin/adminDashboard.html";
+        // redirectUrl = "adminDashboard.html";
+      } else if (role === "health_worker") {
+        redirectUrl = "../HealthWorker/workerDashboard.html"; // Original path
+        // Alternative paths you can try:
+        // redirectUrl = "./HealthWorker/workerDashboard.html";
+        // redirectUrl = "HealthWorker/workerDashboard.html";
+        // redirectUrl = "workerDashboard.html";
+      }
+
+      // Simulate login delay (remove this in production)
+      setTimeout(() => {
+        try {
+          // Attempt to redirect
+          window.location.href = redirectUrl;
+          
+          // If we reach here, the redirect didn't work immediately
+          // Wait a bit more and show error if still here
+          setTimeout(() => {
+            // Reset button state
+            submitText.textContent = "Sign In";
+            loadingSpinner.style.display = "none";
+            submitArrow.style.display = "block";
+            errorMessage.style.display = "block";
+            
+            // Log for debugging
+            console.error("Redirect failed. Attempted URL:", redirectUrl);
+            console.log("Current page URL:", window.location.href);
+            console.log("Make sure the target files exist at the specified paths");
+          }, 1000);
+          
+        } catch (error) {
+          // Reset button state
+          submitText.textContent = "Sign In";
+          loadingSpinner.style.display = "none";
+          submitArrow.style.display = "block";
+          errorMessage.style.display = "block";
+          
+          console.error("Error during redirect:", error);
+        }
+      }, 500);
+    });
+
+    // Initialize with admin theme
+    setAdminTheme();
+
+    // For testing purposes - you can remove this in production
+    console.log("Current page location:", window.location.href);
+    console.log("Make sure your folder structure matches the redirect paths");
+  </script>
+</body>
+</html>
